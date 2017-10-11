@@ -1,7 +1,7 @@
 
 public class Kernel implements IProductPart {
 	public Kernel() {
-		System.out.println("Constructor of Kernel");
+		System.out.println("Construct Kernel");
 		
 	}
 	@Override
