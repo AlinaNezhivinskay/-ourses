@@ -2,13 +2,11 @@
 public class Cook {
 	private int id;
 	private String name;
-	private boolean state;
 	private Order order;
 	public Cook(int id,String name)
 	{
 		this.id=id;
 		this.name=name;
-		state=false;
 		order=null;
 	}
 	public int getId()
@@ -23,13 +21,10 @@ public class Cook {
 	{
 		this.name=name;
 	}
-	public boolean getState()
+	public boolean isCookFree()
 	{
-		return state;
-	}
-	public void setState(boolean state)
-	{
-		this.state=state;
+		if(order==null)return true;
+		return false;
 	}
 	public Order getOrder()
 	{
