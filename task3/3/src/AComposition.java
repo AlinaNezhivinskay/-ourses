@@ -1,10 +1,10 @@
 
-public abstract class AMusicalComposition {
+public abstract class AComposition {
 	private int id;
 	private String name;
 	private double duration;
 	private String genre;
-	public AMusicalComposition(int id,String name,double duration)
+	public AComposition(int id,String name,double duration)
 	{
 		this.id=id;
 		this.name=name;
@@ -45,7 +45,7 @@ public abstract class AMusicalComposition {
 	}
 	public boolean equals(Object o)
 	{
-		return (id==((AMusicalComposition)o).getId())? true:false;
+		return (id==((AComposition)o).getId())? true:false;
 	}
 	
 }

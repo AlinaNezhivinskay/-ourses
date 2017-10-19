@@ -1,47 +1,28 @@
 public class Disk {
-	private AMusicalComposition[]compositions;
-	public Disk()
+	private AComposition[]compositions;
+	public Disk(int compositionsNumber)
 	{
-		compositions=new AMusicalComposition[1];
+		compositions=new AComposition[compositionsNumber];
 	}
-	public AMusicalComposition[] getCompositions()
+	public AComposition[] getCompositions()
 	{
 		return compositions;
 	}
-	public void setCompositions(AMusicalComposition[]compositions)
+	public void setCompositions(AComposition[]compositions)
 	{
 		this.compositions=compositions;
 	}
-	public void addComposition(AMusicalComposition composition)
+	public void addComposition(AComposition composition)
 	{
-		if(compositions[0]==null)compositions[0]=composition;
+		if(Checker.isEmptySpace(compositions))
+		{
+			int position=Checker.getFreePosition(compositions);
+			compositions[position]=composition;
+		}
 		else
 		{
-		 AMusicalComposition[]compositions=new AMusicalComposition[this.compositions.length+1];
-		 System.arraycopy(this.compositions, 0, compositions, 0,this.compositions.length );
-		 //compositions=this.compositions.clone();
-		 compositions[this.compositions.length]=composition;
-		 this.compositions=compositions;
+			Printer.printMessage("There no free space");
 		}
-	}
-	public void removeComposition(AMusicalComposition composition)
-	{
-		for(int i=0;i<compositions.length;i++)
-		{
-			if(compositions[i].equals(composition))compositions[i]=null;
-		}
-		AMusicalComposition[] compositionsCopy=compositions.clone();
-		compositions=new AMusicalComposition[compositions.length-1];
-		int j=0;
-		for(int i=0;i<compositionsCopy.length;i++)
-		{
-			if(compositionsCopy[i]!=null)
-			{
-				compositions[j]=compositionsCopy[i];
-				j++;
-			}
-		}
-		 
 	}
 	public double getTotalDuration()
 	{
@@ -54,37 +35,47 @@ public class Disk {
 	}
 	public String getTotalGenre()
 	{
-		int[] genres=new int[5];
+		int[] genresCounts=getGenresCounts();
+		int max=genresCounts[0];
+		int maxPossition=0;
+		for(int i=1;i<genresCounts.length;i++) {
+			if(genresCounts[i]>max)
+			{
+				max=genresCounts[i];
+				maxPossition=i;
+			}
+		}
+		return getGenreNameByPosition(maxPossition);
+		
+	}
+	private int[] getGenresCounts()
+	{
+		int[] genresCounts=new int[5];
 		for(int i=0;i<this.compositions.length;i++)
 		 {
 			switch(compositions[i].getGenre()) {
 		    case "Country": 
-			    genres[0]++;
+		    	genresCounts[0]++;
 				break;
 			case "Hip-Hop": 
-			    genres[1]++;
+				genresCounts[1]++;
 				break;
 			case "Jazz": 
-			    genres[2]++;
+				genresCounts[2]++;
 				break;
 			case "Pop":
-			    genres[3]++;
+				genresCounts[3]++;
 			    break;
 			case "Rock": 
-				genres[4]++;
+				genresCounts[4]++;
 			    break;
 		}
 		 }
-		int max=genres[0];
-		int maxPossition=0;
-		for(int i=1;i<genres.length;i++) {
-			if(genres[i]>max)
-			{
-				max=genres[i];
-				maxPossition=i;
-			}
-		}
-		switch(maxPossition) {
+		return genresCounts;
+	}
+	private String getGenreNameByPosition(int position)
+	{
+		switch(position) {
 	    case 0: 
 		    return "Country";
 		case 1: 
@@ -97,12 +88,5 @@ public class Disk {
 			return "Rock";
 		}
 		return null;
-	} 
-	public void printCompositions()
-	{
-		for(int i=0;i<compositions.length;i++)
-		{
-			System.out.println(compositions[i]);
-		}
 	}
 }

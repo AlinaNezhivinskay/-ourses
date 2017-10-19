@@ -1,48 +1,33 @@
 
 public class Order {
 	private int id;
-	private int tableNumber;
+	private Table table;
 	private Dish[] orderedDishs;
-	public Order(int id,int tableNumber,Menu menu,int[]dishesIdFromMenu)
+	public Order(int id,Table table,Dish[] dishs)
 	{
 		this.id=id;
-		this.tableNumber=tableNumber;
-		orderedDishs=new Dish[dishesIdFromMenu.length];
-		for(int i=0;i<orderedDishs.length;i++)
-		{
-			orderedDishs[i]=menu.getDishById(dishesIdFromMenu[i]);
-		}
+		this.table=table;
+		orderedDishs=dishs;
 	}
 	public int getId()
 	{
 		return id;
 	}
-	public int getTableNumber()
+	public Table getTable()
 	{
-		return tableNumber;
+		return table;
 	}
-	public void setName(int tableNumber)
+	public void setTable(Table table)
 	{
-		this.tableNumber=tableNumber;
+		this.table=table;
 	}
 	public Dish[] getOrderedDishs()
 	{
 		return orderedDishs;
 	}
-	public void setPrice(Dish[] orderedDishs)
+	public void setOrderedDishs(Dish[] orderedDishs)
 	{
 		this.orderedDishs=orderedDishs;
-	}
-	public void printCheck()
-	{
-		System.out.println("Check");
-		double sum=0;
-		for(int i=0;i<orderedDishs.length;i++)
-		{
-			System.out.println(orderedDishs[i]);
-			sum+=orderedDishs[i].getPrice();
-		}
-		System.out.println("Total sum="+sum);
 	}
 	public boolean equals(Object o)
 	{
