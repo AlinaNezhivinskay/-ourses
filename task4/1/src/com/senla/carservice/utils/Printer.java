@@ -14,8 +14,9 @@ public class Printer {
 	}
 
 	public static void print(Garage[] garages) {
+		garages=(Garage[])ArrayWorker.cutNullEntities(garages);
 		for (Garage garage : garages) {
-			System.out.println(garage);
+			print(garage);
 		}
 	}
 
@@ -24,8 +25,9 @@ public class Printer {
 	}
 
 	public static void print(Master[] masters) {
+		masters=(Master[])ArrayWorker.cutNullEntities(masters);
 		for (Master master : masters) {
-			System.out.println(master);
+			print(master);
 		}
 	}
 
@@ -34,8 +36,9 @@ public class Printer {
 	}
 
 	public static void print(Order[] orders) {
+		orders=(Order[])ArrayWorker.cutNullEntities(orders);
 		for (Order order : orders) {
-			System.out.println(order);
+			print(order);
 		}
 	}
 

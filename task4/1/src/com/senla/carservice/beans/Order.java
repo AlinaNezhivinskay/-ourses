@@ -14,11 +14,12 @@ public class Order extends Entity {
 	private double price;
 	private OrderState state;
 	private Garage garage;
+	private Master master;
 
 	public Order(Date submissionDate, Date executionDate, Date plannedStartDate, double price, Garage garage) {
-		this.submissionDate = submissionDate;
-		this.executionDate = executionDate;
-		this.plannedStartDate = plannedStartDate;
+		this.submissionDate = DateWorker.formatDate(submissionDate);
+		this.executionDate = DateWorker.formatDate(executionDate);
+		this.plannedStartDate = DateWorker.formatDate(plannedStartDate);
 		this.price = price;
 		state = OrderState.EXECUTABLE;
 		garage.setIsFree(false);
@@ -26,10 +27,11 @@ public class Order extends Entity {
 	}
 
 	public Order(long id, Date submissionDate, Date executionDate, Date plannedStartDate, double price,
-			OrderState state, Garage garage) {
+			OrderState state, Garage garage, Master master) {
 		this(submissionDate, executionDate, plannedStartDate, price, garage);
 		this.id = id;
 		this.state = state;
+		this.master = master;
 	}
 
 	@Override
@@ -72,6 +74,10 @@ public class Order extends Entity {
 
 	public Garage getGarage() {
 		return garage;
+	}
+
+	public Master getMaster() {
+		return master;
 	}
 
 	@Override

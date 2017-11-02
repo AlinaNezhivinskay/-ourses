@@ -12,7 +12,7 @@ public interface IOrderService {
 
 	public boolean removeOrder(Order order);
 
-	public boolean updateOrder(Order order);
+	public boolean updateOrder(Order order, OrderState state);
 
 	public boolean closeOrder(Order order);
 
@@ -26,13 +26,19 @@ public interface IOrderService {
 
 	public Order getOrderByMaster(Master master);
 
+	public Master getMasterByOrder(Order order);
+
 	public Order[] getOrders();
 
 	public Order[] getCurrentExecutingOrders();
 
 	public Order[] getOrders(OrderState state, Date startTimePeriod, Date endTimePeriod);
 
+	public void sort(Comparator<Order> comparator);
+
 	public void sort(Comparator<Order> comparator, Order[] orders);
+
+	public int getFreeMasterNumber(Date date);
 
 	public int getFreeGarageNumber(Date date);
 }

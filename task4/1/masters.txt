@@ -1,10 +1,4 @@
-10/Sidorov Dima
-10/Sidorov Dima
-10/Sidorov Dima
-0/Petrov Ivan
-0/Petrov Ivan
-0/Petrov Ivan
-null
-null
-null
-null
+0/Petrov Ivan/true
+10/Sidorov Dima/true
+20/Petrov Ivan/true
+30/Sidorov Dima/true

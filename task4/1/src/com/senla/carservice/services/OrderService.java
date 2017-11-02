@@ -6,7 +6,6 @@ import java.util.Date;
 
 import com.senla.carservice.beans.Master;
 import com.senla.carservice.beans.Order;
-import com.senla.carservice.repositories.HistoryOrderRepository;
 import com.senla.carservice.repositories.OrderRepository;
 import com.senla.carservice.services.interfaces.IOrderService;
 import com.senla.carservice.utils.ArrayWorker;
@@ -15,11 +14,9 @@ import com.senla.carservice.orderstate.OrderState;
 
 public class OrderService implements IOrderService {
 	private OrderRepository orderRepository;
-	private HistoryOrderRepository historyOrderRepository;
 
-	public OrderService(OrderRepository orderRepository) {
-		this.orderRepository = orderRepository;
-		this.historyOrderRepository = HistoryOrderRepository.getInstance();
+	public OrderService(String fileName) {
+		this.orderRepository = new OrderRepository(fileName);
 	}
 
 	@Override
@@ -29,12 +26,18 @@ public class OrderService implements IOrderService {
 
 	@Override
 	public boolean removeOrder(Order order) {
+		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)].getGarage()
+				.setIsFree(true);
+		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)].getMaster()
+				.setIsFree(true);
+		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)]
+				.setExecutionDate(new Date());
 		return orderRepository.removeOrder(order);
 	}
 
 	@Override
-	public boolean updateOrder(Order order) {
-		return orderRepository.updateOrder(order);
+	public boolean updateOrder(Order order, OrderState state) {
+		return orderRepository.updateOrder(order, state);
 	}
 
 	@Override
@@ -43,6 +46,10 @@ public class OrderService implements IOrderService {
 			return false;
 		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)].getGarage()
 				.setIsFree(true);
+		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)].getMaster()
+				.setIsFree(true);
+		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)]
+				.setExecutionDate(new Date());
 		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)]
 				.setState(OrderState.EXECUTED);
 		return true;
@@ -54,6 +61,10 @@ public class OrderService implements IOrderService {
 			return false;
 		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)].getGarage()
 				.setIsFree(true);
+		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)].getMaster()
+				.setIsFree(true);
+		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)]
+				.setExecutionDate(new Date());
 		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)]
 				.setState(OrderState.CANCELED);
 		return true;
@@ -84,7 +95,7 @@ public class OrderService implements IOrderService {
 		for (int i = 0; i < orderRepository.getOrders().length; i++) {
 			if (orderRepository.getOrders()[i].getState().equals(OrderState.EXECUTABLE)) {
 				if (!ArrayWorker.addElementInArray(executingOrders, orderRepository.getOrders()[i])) {
-					executingOrders = ArrayWorker.expandArray(executingOrders);
+					executingOrders = (Order[]) ArrayWorker.expandArray(executingOrders);
 					i--;
 				}
 			}
@@ -96,11 +107,13 @@ public class OrderService implements IOrderService {
 	public Order[] getOrders(OrderState state, Date startTimePeriod, Date endTimePeriod) {
 		Order[] orders = new Order[ArrayWorker.ARRAY_LENGTH];
 		for (int i = 0; i < orderRepository.getOrders().length; i++) {
+			if (orderRepository.getOrders()[i] == null)
+				continue;
 			if (orderRepository.getOrders()[i].getState().equals(state)
-					&& orderRepository.getOrders()[i].getExecutionDate().after(startTimePeriod)
-					&& orderRepository.getOrders()[i].getExecutionDate().before(endTimePeriod)) {
+					&& startTimePeriod.before(orderRepository.getOrders()[i].getSubmissionDate())
+					&& endTimePeriod.after(orderRepository.getOrders()[i].getExecutionDate())) {
 				if (!ArrayWorker.addElementInArray(orders, orderRepository.getOrders()[i])) {
-					orders = ArrayWorker.expandArray(orders);
+					orders = (Order[]) ArrayWorker.expandArray(orders);
 					i--;
 				}
 			}
@@ -109,9 +122,13 @@ public class OrderService implements IOrderService {
 	}
 
 	@Override
+	public void sort(Comparator<Order> comparator) {
+		Arrays.sort(orderRepository.getOrders(), comparator);
+	}
+
+	@Override
 	public void sort(Comparator<Order> comparator, Order[] orders) {
 		Arrays.sort(orders, comparator);
-		;
 	}
 
 	@Override
@@ -124,9 +141,28 @@ public class OrderService implements IOrderService {
 	public Order getOrderByMaster(Master master) {
 		if (master == null)
 			return null;
-		for (int i = 0; i < historyOrderRepository.getHistoryOrders().length; i++) {
-			if (historyOrderRepository.getHistoryOrders()[i].getMaster().equals(master)) {
-				return historyOrderRepository.getHistoryOrders()[i].getOrder();
+		for (int i = 0; i < orderRepository.getOrders().length; i++) {
+			if (orderRepository.getOrders()[i] == null) {
+				continue;
+			}
+			if (orderRepository.getOrders()[i].getMaster().equals(master)) {
+				return orderRepository.getOrders()[i];
+			}
+		}
+		return null;
+
+	}
+
+	@Override
+	public Master getMasterByOrder(Order order) {
+		if (order == null)
+			return null;
+		for (int i = 0; i < orderRepository.getOrders().length; i++) {
+			if (orderRepository.getOrders()[i] == null) {
+				continue;
+			}
+			if (orderRepository.getOrders()[i].equals(order)) {
+				return orderRepository.getOrders()[i].getMaster();
 			}
 		}
 		return null;
@@ -142,6 +178,18 @@ public class OrderService implements IOrderService {
 				freeGaragesNum++;
 		}
 		return freeGaragesNum;
+	}
+
+	@Override
+	public int getFreeMasterNumber(Date date) {
+		int freeMastersNum = 0;
+		for (int i = 0; i < orderRepository.getOrders().length; i++) {
+			if (orderRepository.getOrders()[i] == null)
+				continue;
+			if (orderRepository.getOrders()[i].getExecutionDate().before(date))
+				freeMastersNum++;
+		}
+		return freeMastersNum;
 	}
 
 }

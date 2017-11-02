@@ -6,12 +6,16 @@ import com.senla.carservice.utils.ArrayWorker;
 import com.senla.carservice.utils.Converter;
 
 public class GarageRepository {
-	private static final TextFileWorker GARAGE_FILE_WORKER = new TextFileWorker(
-			"E:/учёба Алины/Courses/task4/1/garages.txt");
+	private TextFileWorker garageFileWorker;
 	private static long lastId = 0;
-	private Garage[] garages;
+	private static Garage[] garages;
 
-	public GarageRepository() {
+	public GarageRepository(String fileName) {
+		if (fileName != null) {
+			garageFileWorker = new TextFileWorker(fileName);
+		} else {
+			garageFileWorker = new TextFileWorker("E:/учёба Алины/Courses/task4/1/garages.txt");
+		}
 		garages = new Garage[ArrayWorker.ARRAY_LENGTH];
 	}
 
@@ -19,7 +23,7 @@ public class GarageRepository {
 		return garages;
 	}
 
-	public Garage getGarage(long id) {
+	public static Garage getGarage(long id) {
 		for (int i = 0; i < garages.length; i++) {
 			if (garages[i].getId() == id)
 				return garages[i];
@@ -43,19 +47,21 @@ public class GarageRepository {
 		return true;
 	}
 
-	public boolean updateGarage(Garage garage) {
+	public boolean updateGarage(Garage garage, boolean isFree) {
 		if (!ArrayWorker.isElementOnArray(garages, garage))
 			return false;
-		garages[ArrayWorker.getPositionOfElement(garages, garage)] = garage;
+		garages[ArrayWorker.getPositionOfElement(garages, garage)].setIsFree(isFree);
 		return true;
 	}
 
 	public void safeToFile() {
-		GARAGE_FILE_WORKER.writeToFile(Converter.convertGaragesToStrings(garages));
+		garageFileWorker.writeToFile(Converter.convertGaragesToStrings(garages));
 	}
 
 	public void readFromFile() {
-		garages = Converter.convertStringsToGarages(GARAGE_FILE_WORKER.readFromFile());
+		garages = Converter.convertStringsToGarages(garageFileWorker.readFromFile());
+		lastId = garages[garages.length - 1].getId();
+		incrementLastId();
 	}
 
 	private void incrementLastId() {

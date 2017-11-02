@@ -9,7 +9,7 @@ public interface IGarageService {
 
 	public boolean removeGarage(Garage garage);
 
-	public boolean updateGarage(Garage garage);
+	public boolean updateGarage(Garage garage,boolean isFree);
 
 	public void safeToFile();
 
