@@ -13,6 +13,10 @@ public class DateWorker {
 		return DATE_FORMAT.format(date);
 	}
 
+	public static Date formatDate(Date date) {
+		return parse(format(date));
+	}
+
 	public static Date parse(String str) {
 		try {
 			return DATE_FORMAT.parse(str);

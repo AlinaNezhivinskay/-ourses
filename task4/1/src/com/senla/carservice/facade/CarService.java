@@ -3,25 +3,27 @@ package com.senla.carservice.facade;
 import java.util.Date;
 
 import com.senla.carservice.beans.Garage;
-import com.senla.carservice.beans.HistoryOrder;
 import com.senla.carservice.beans.Master;
 import com.senla.carservice.beans.Order;
 import com.senla.carservice.comparators.masters.*;
 import com.senla.carservice.comparators.orders.*;
 import com.senla.carservice.orderstate.OrderState;
-import com.senla.carservice.repositories.HistoryOrderRepository;
+import com.senla.carservice.services.GarageService;
+import com.senla.carservice.services.MasterService;
+import com.senla.carservice.services.OrderService;
 import com.senla.carservice.services.interfaces.*;
 import com.senla.carservice.utils.DateWorker;
+import com.senla.carservice.utils.Printer;
 
 public class CarService {
 	private IGarageService garageService;
 	private IMasterService masterService;
 	private IOrderService orderService;
 
-	public CarService(IGarageService garageService, IMasterService masterService, IOrderService orderService) {
-		this.garageService = garageService;
-		this.masterService = masterService;
-		this.orderService = orderService;
+	public CarService(String garageFileName, String masterFileName, String orderFileName) {
+		this.garageService = new GarageService(garageFileName);
+		this.masterService = new MasterService(masterFileName);
+		this.orderService = new OrderService(orderFileName);
 	}
 
 	public void addGarage(Garage garage) {
@@ -32,12 +34,12 @@ public class CarService {
 		garageService.removeGarage(garage);
 	}
 
-	public void updateGarage(Garage garage) {
-		garageService.updateGarage(garage);
+	public void updateGarage(Garage garage, boolean isFree) {
+		garageService.updateGarage(garage, isFree);
 	}
 
-	public Garage[] getGarages() {
-		return garageService.getGarages();
+	public void getGarages() {
+		Printer.print(garageService.getGarages());
 	}
 
 	public void addMaster(Master master) {
@@ -48,12 +50,12 @@ public class CarService {
 		masterService.removeMaster(master);
 	}
 
-	public void updateMaster(Master master) {
-		masterService.updateMaster(master);
+	public void updateMaster(Master master, boolean isFree) {
+		masterService.updateMaster(master, isFree);
 	}
 
-	public Master[] getMasters() {
-		return masterService.getMasters();
+	public void getMasters() {
+		Printer.print(masterService.getMasters());
 	}
 
 	public void addOrder(Order order) {
@@ -72,99 +74,136 @@ public class CarService {
 		orderService.cancelOrder(order);
 	}
 
-	public void updateOrder(Order order) {
-		orderService.updateOrder(order);
+	public void updateOrder(Order order, OrderState state) {
+		orderService.updateOrder(order, state);
 	}
 
-	public void assignMasterToOrder(Order order, Master master) {
-		HistoryOrderRepository.getInstance().addHistoryOrders(new HistoryOrder(order, master));
+	public void getFreeGarages() {
+		Printer.print(garageService.getFreeGarages());
 	}
 
-	public Garage[] getFreeGarages() {
-		return garageService.getFreeGarages();
+	public void getOrders() {
+		Printer.print(orderService.getOrders());
 	}
 
-	public Order[] getOrders() {
-		return orderService.getOrders();
+	public void getCurrentExecutingOrders() {
+		Printer.print(orderService.getCurrentExecutingOrders());
 	}
 
-	public Order[] getCurrentExecutingOrders() {
-		return orderService.getCurrentExecutingOrders();
+	public void getOrderByMaster(Master master) {
+		Printer.print(orderService.getOrderByMaster(master));
 	}
 
-	public Order getOrderByMaster(Master master) {
-		return orderService.getOrderByMaster(master);
+	public void getMasterByOrder(Order order) {
+		Printer.print(orderService.getMasterByOrder(order));
 	}
 
-	public Master getMasterByOrder(Order order) {
-		return masterService.getMasterByOrder(order);
+	public void getExecutedOrders(Date startDate, Date endDate) {
+		Printer.print("EXECUTED ORDERS:");
+		Printer.print(orderService.getOrders(OrderState.EXECUTED, startDate, endDate));
 	}
 
-	public Order[] getExecutedOrders(Date startDate, Date endDate) {
-		return orderService.getOrders(OrderState.EXECUTED, startDate, endDate);
+	public void getCanceledOrders(Date startDate, Date endDate) {
+		Printer.print("CANCELED ORDERS:");
+		Printer.print(orderService.getOrders(OrderState.CANCELED, startDate, endDate));
 	}
 
-	public Order[] getCanceledOrders(Date startDate, Date endDate) {
-		return orderService.getOrders(OrderState.CANCELED, startDate, endDate);
-	}
-
-	public Order[] getRemoteOrders(Date startDate, Date endDate) {
-		return orderService.getOrders(OrderState.REMOTE, startDate, endDate);
+	public void getRemoteOrders(Date startDate, Date endDate) {
+		Printer.print("REMOTE ORDERS:");
+		Printer.print(orderService.getOrders(OrderState.REMOTE, DateWorker.formatDate(startDate),
+				DateWorker.formatDate(endDate)));
 	}
 
 	public int getFreeCarServicePlaceNum(Date date) {
-		int freeMasters = masterService.getFreeMastersNumber(date);
+		date = DateWorker.formatDate(date);
+		int freeMasters = masterService.getFreeMastersNumber(date) + orderService.getFreeMasterNumber(date);
 		int freeGarages = garageService.getFreeGarageNumber() + orderService.getFreeGarageNumber(date);
-		return (freeMasters > freeGarages) ? freeGarages : freeMasters;
+		int freePlace = (freeMasters > freeGarages) ? freeGarages : freeMasters;
+		Printer.print("Free carService place=" + freePlace);
+		return freePlace;
 	}
 
-	public Date getFreeDate() {
+	public void getFreeDate() {
 		Date date = new Date();
 		while (getFreeCarServicePlaceNum(date) == 0) {
 			date = DateWorker.shiftDate(date, 1);
 		}
-		return date;
+		Printer.print(date);
+	}
+
+	public void sortOrdersBySubmissionDate() {
+		orderService.sort(new SubmissionDateComparator());
+		getOrders();
+	}
+
+	public void sortOrdersByExecutionDate() {
+		orderService.sort(new ExecutionDateComparator());
+		getOrders();
+	}
+
+	public void sortOrdersByPlannedStartDate() {
+		orderService.sort(new PlannedStartDateComparator());
+		getOrders();
+	}
+
+	public void sortOrdersByPrice() {
+		orderService.sort(new PriceComparator());
+		getOrders();
+	}
+
+	public void sortMastersByAlphabetAscending() {
+		masterService.sort(new AscendingAlphabetComparator());
+		getMasters();
+
+	}
+
+	public void sortMastersByAlphabetDescending() {
+		masterService.sort(new DescendingAlphabetComparator());
+		getMasters();
+
+	}
+
+	public void sortMastersByEmployment() {
+		masterService.sort(new EmploymentComparator());
+		getMasters();
+	}
+
+	public void sortExecutingOrdersBySubmissionDate() {
+		sortOrdersBySubmissionDate(orderService.getCurrentExecutingOrders());
+	}
+
+	public void sortExecutingOrdersByExecutionDate() {
+		sortOrdersByExecutionDate(orderService.getCurrentExecutingOrders());
+	}
+
+	public void sortExecutingOrdersByPrice() {
+		sortOrdersByPrice(orderService.getCurrentExecutingOrders());
 	}
 
 	public void sortOrdersBySubmissionDate(Order[] orders) {
 		orderService.sort(new SubmissionDateComparator(), orders);
+		Printer.print(orders);
 	}
 
 	public void sortOrdersByExecutionDate(Order[] orders) {
 		orderService.sort(new ExecutionDateComparator(), orders);
-	}
-
-	public void sortOrdersByPlannedStartDate(Order[] orders) {
-		orderService.sort(new PlannedStartDateComparator(), orders);
+		Printer.print(orders);
 	}
 
 	public void sortOrdersByPrice(Order[] orders) {
 		orderService.sort(new PriceComparator(), orders);
+		Printer.print(orders);
 	}
 
-	public void sortMastersByAlphabet(Master[] masters, boolean isAscending) {
-		if (isAscending) {
-			masterService.sort(new AscendingAlphabetComparator(), masters);
-		} else {
-			masterService.sort(new DescendingAlphabetComparator(), masters);
-		}
-	}
-
-	public void sortMastersByEmployment(Master[] masters) {
-		masterService.sort(new EmploymentComparator(), masters);
-	}
-
-	public void safeAll() {
+	public void exit() {
 		garageService.safeToFile();
 		masterService.safeToFile();
 		orderService.safeToFile();
-		HistoryOrderRepository.getInstance().safeToFile();
 	}
 
 	public void loadDate() {
 		garageService.readFromFile();
 		masterService.readFromFile();
 		orderService.readFromFile();
-		HistoryOrderRepository.getInstance().readFromFile();
 	}
 }

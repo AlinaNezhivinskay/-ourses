@@ -6,12 +6,16 @@ import com.senla.carservice.utils.ArrayWorker;
 import com.senla.carservice.utils.Converter;
 
 public class MasterRepository {
-	private static final TextFileWorker MASTER_FILE_WORKER = new TextFileWorker(
-			"E:/учёба Алины/Courses/task4/1/masters.txt");
+	private TextFileWorker masterFileWorker;
 	private static long lastId = 0;
-	private Master[] masters;
+	private static Master[] masters;
 
-	public MasterRepository() {
+	public MasterRepository(String fileName) {
+		if (fileName != null) {
+			masterFileWorker = new TextFileWorker(fileName);
+		} else {
+			masterFileWorker = new TextFileWorker("E:/учёба Алины/Courses/task4/1/masters.txt");
+		}
 		masters = new Master[ArrayWorker.ARRAY_LENGTH];
 	}
 
@@ -19,7 +23,7 @@ public class MasterRepository {
 		return masters;
 	}
 
-	public Master getMaster(long id) {
+	public static Master getMaster(long id) {
 		for (int i = 0; i < masters.length; i++) {
 			if (masters[i].getId() == id)
 				return masters[i];
@@ -29,7 +33,7 @@ public class MasterRepository {
 
 	public void addMaster(Master master) {
 		if (!ArrayWorker.isEmptySpace(masters)) {
-			masters = ArrayWorker.expandArray(masters);
+			masters = (Master[]) ArrayWorker.expandArray(masters);
 		}
 		master.setId(lastId);
 		incrementLastId();
@@ -43,19 +47,21 @@ public class MasterRepository {
 		return true;
 	}
 
-	public boolean updateMaster(Master master) {
+	public boolean updateMaster(Master master, boolean isFree) {
 		if (!ArrayWorker.isElementOnArray(masters, master))
 			return false;
-		masters[ArrayWorker.getPositionOfElement(masters, master)] = master;
+		masters[ArrayWorker.getPositionOfElement(masters, master)].setIsFree(isFree);
 		return true;
 	}
 
 	public void safeToFile() {
-		MASTER_FILE_WORKER.writeToFile(Converter.convertMastersToStrings(masters));
+		masterFileWorker.writeToFile(Converter.convertMastersToStrings(masters));
 	}
 
 	public void readFromFile() {
-		masters = Converter.convertStringsToMasters(MASTER_FILE_WORKER.readFromFile());
+		masters = Converter.convertStringsToMasters(masterFileWorker.readFromFile());
+		lastId = masters[masters.length - 1].getId();
+		incrementLastId();
 	}
 
 	private void incrementLastId() {

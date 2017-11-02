@@ -8,8 +8,8 @@ import com.senla.carservice.utils.ArrayWorker;
 public class GarageService implements IGarageService {
 	private GarageRepository garageRepository;
 
-	public GarageService(GarageRepository garageRepository) {
-		this.garageRepository = garageRepository;
+	public GarageService(String fileName) {
+		this.garageRepository = new GarageRepository(fileName);
 	}
 
 	@Override
@@ -23,8 +23,8 @@ public class GarageService implements IGarageService {
 	}
 
 	@Override
-	public boolean updateGarage(Garage garage) {
-		return garageRepository.updateGarage(garage);
+	public boolean updateGarage(Garage garage,boolean isFree) {
+		return garageRepository.updateGarage(garage,isFree);
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public class GarageService implements IGarageService {
 			if(garageRepository.getGarages()[i]==null)continue;
 			if (garageRepository.getGarages()[i].getIsFree()) {
 				if (!ArrayWorker.addElementInArray(freeGarages, garageRepository.getGarages()[i])) {
-					freeGarages = ArrayWorker.expandArray(freeGarages);
+					freeGarages = (Garage[])ArrayWorker.expandArray(freeGarages);
 					i--;
 				}
 			}

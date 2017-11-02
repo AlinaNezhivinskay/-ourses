@@ -1,10 +1,9 @@
 package com.senla.carservice.utils;
 
-import com.senla.carservice.beans.Garage;
-import com.senla.carservice.beans.HistoryOrder;
-import com.senla.carservice.beans.Master;
-import com.senla.carservice.beans.Order;
+import java.util.Arrays;
+
 import com.senla.carservice.beans.abstractentity.Entity;
+import com.senla.carservice.comparators.entity.NullEntityComparator;
 
 public class ArrayWorker {
 	public static final int ARRAY_LENGTH = 10;
@@ -52,39 +51,16 @@ public class ArrayWorker {
 		return true;
 	}
 
-	public static HistoryOrder[] expandArray(HistoryOrder[] historyOrders) {
-		int length = historyOrders.length * 2;
-		HistoryOrder[] newEntitiesArray = new HistoryOrder[length];
-		for (int i = 0; i < historyOrders.length; i++) {
-			newEntitiesArray[i] = historyOrders[i];
-		}
-		return newEntitiesArray;
+	public static Entity[] expandArray(Entity[] entities) {
+		return Arrays.copyOf(entities, (int) (entities.length * 2));
 	}
 
-	public static Garage[] expandArray(Garage[] garages) {
-		int length = garages.length * 2;
-		Garage[] newGarageArray = new Garage[length];
-		for (int i = 0; i < garages.length; i++) {
-			newGarageArray[i] = garages[i];
+	public static Entity[] cutNullEntities(Entity[] entities) {
+		if (isEmptySpace(entities)) {
+			Arrays.sort(entities, new NullEntityComparator());
+			return Arrays.copyOfRange(entities, 0, getFreePosition(entities));
 		}
-		return newGarageArray;
+		return entities;
 	}
 
-	public static Master[] expandArray(Master[] masters) {
-		int length = masters.length * 2;
-		Master[] newMastersArray = new Master[length];
-		for (int i = 0; i < masters.length; i++) {
-			newMastersArray[i] = masters[i];
-		}
-		return newMastersArray;
-	}
-
-	public static Order[] expandArray(Order[] orders) {
-		int length = orders.length * 2;
-		Order[] newOrderArray = new Order[length];
-		for (int i = 0; i < orders.length; i++) {
-			newOrderArray[i] = orders[i];
-		}
-		return newOrderArray;
-	}
 }

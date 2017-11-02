@@ -1,14 +1,19 @@
 package com.senla.carservice.utils;
 
+import java.util.Arrays;
 
 import com.senla.carservice.beans.Garage;
-import com.senla.carservice.beans.HistoryOrder;
 import com.senla.carservice.beans.Master;
 import com.senla.carservice.beans.Order;
+import com.senla.carservice.comparators.entity.IdComparator;
 import com.senla.carservice.orderstate.OrderState;
+import com.senla.carservice.repositories.GarageRepository;
+import com.senla.carservice.repositories.MasterRepository;
 
 public class Converter {
 	public static String[] convertGaragesToStrings(Garage[] garages) {
+		garages=(Garage[])ArrayWorker.cutNullEntities(garages);
+		Arrays.sort(garages, new IdComparator());
 		String[] strGarages = new String[garages.length];
 		for (int i = 0; i < garages.length; i++) {
 			strGarages[i] = convertGarageToString(garages[i]);
@@ -40,6 +45,8 @@ public class Converter {
 	}
 
 	public static String[] convertMastersToStrings(Master[] masters) {
+		masters=(Master[])ArrayWorker.cutNullEntities(masters);
+		Arrays.sort(masters, new IdComparator());
 		String[] strMasters = new String[masters.length];
 		for (int i = 0; i < masters.length; i++) {
 			strMasters[i] = convertMasterToString(masters[i]);
@@ -59,7 +66,7 @@ public class Converter {
 		if (master == null)
 			return null;
 		StringBuilder str = new StringBuilder();
-		str.append(master.getId()).append('/').append(master.getName());
+		str.append(master.getId()).append('/').append(master.getName()).append('/').append(master.getIsFree());
 		return str.toString();
 	}
 
@@ -67,10 +74,13 @@ public class Converter {
 		if (str.equals("null"))
 			return null;
 		String[] masterComponents = str.split("/");
-		return new Master(Long.parseLong(masterComponents[0]), masterComponents[1]);
+		return new Master(Long.parseLong(masterComponents[0]), masterComponents[1],
+				Boolean.parseBoolean(masterComponents[2]));
 	}
 
 	public static String[] convertOrdersToStrings(Order[] orders) {
+		orders=(Order[])ArrayWorker.cutNullEntities(orders);
+		Arrays.sort(orders, new IdComparator());
 		String[] strOrders = new String[orders.length];
 		for (int i = 0; i < orders.length; i++) {
 			strOrders[i] = convertOrderToString((orders[i]));
@@ -94,7 +104,7 @@ public class Converter {
 				.append(DateWorker.format(order.getExecutionDate())).append('/')
 				.append(DateWorker.format(order.getPlannedStartDate())).append('/').append(order.getPrice()).append('/')
 				.append(order.getState()).append('/').append(order.getGarage().getId()).append('/')
-				.append(order.getGarage().getIsFree());
+				.append(order.getMaster() == null ? null : order.getMaster().getId());
 		return str.toString();
 	}
 
@@ -102,50 +112,12 @@ public class Converter {
 		if (str.equals("null"))
 			return null;
 		String[] orderComponents = str.split("/");
-
 		return new Order(Long.parseLong(orderComponents[0]), DateWorker.parse(orderComponents[1]),
 				DateWorker.parse(orderComponents[2]), DateWorker.parse(orderComponents[3]),
 				Double.parseDouble(orderComponents[4]), OrderState.valueOf(orderComponents[5]),
-				new Garage(Long.parseLong(orderComponents[6]), Boolean.parseBoolean(orderComponents[7])));
+				GarageRepository.getGarage(Long.parseLong(orderComponents[6])), orderComponents[7].equals("null") ? null
+						: MasterRepository.getMaster(Long.parseLong(orderComponents[7])));
 
 	}
 
-	public static String[] convertHisoryOrdersToStrings(HistoryOrder[] historyOrders) {
-		String[] strHistoryOrders = new String[historyOrders.length];
-		for (int i = 0; i < historyOrders.length; i++) {
-			strHistoryOrders[i] = convertHistoryOrderToString((historyOrders[i]));
-		}
-		return strHistoryOrders;
-	}
-
-	public static HistoryOrder[] convertStringsToHistoryOrders(String[] strings) {
-		HistoryOrder[] hystoryOrders = new HistoryOrder[strings.length];
-		for (int i = 0; i < strings.length; i++) {
-			hystoryOrders[i] = convertStringToHistoryOrder((strings[i]));
-		}
-		return hystoryOrders;
-	}
-
-	private static String convertHistoryOrderToString(HistoryOrder historyOrder) {
-		if (historyOrder == null)
-			return null;
-		StringBuilder str = new StringBuilder();
-		str.append(historyOrder.getOrder()).append('/').append(convertOrderToString(historyOrder.getOrder()))
-				.append('/').append(convertMasterToString(historyOrder.getMaster()));
-		return str.toString();
-	}
-
-	private static HistoryOrder convertStringToHistoryOrder(String str) {
-		if (str.equals("null"))
-			return null;
-		String[] historyOrderComponents = str.split("/");
-		return new HistoryOrder(Long.parseLong(historyOrderComponents[0]),
-				new Order(Long.parseLong(historyOrderComponents[1]), DateWorker.parse(historyOrderComponents[2]),
-						DateWorker.parse(historyOrderComponents[3]), DateWorker.parse(historyOrderComponents[4]),
-						Double.parseDouble(historyOrderComponents[5]), OrderState.valueOf(historyOrderComponents[6]),
-						new Garage(Long.parseLong(historyOrderComponents[7]),
-								Boolean.parseBoolean(historyOrderComponents[8]))),
-				new Master(Long.parseLong(historyOrderComponents[9]), historyOrderComponents[10]));
-
-	}
 }
