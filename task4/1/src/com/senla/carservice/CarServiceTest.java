@@ -10,7 +10,7 @@ public class CarServiceTest {
 	public static void main(String[] args) {
 		CarService carService = new CarService(null, null, null);// args[0],args[1],args[2]);
 
-		// carService.loadDate();
+		carService.loadDate();
 
 		Garage garage1 = new Garage();
 		Garage garage2 = new Garage();
@@ -35,7 +35,7 @@ public class CarServiceTest {
 		carService.addOrder(order2);
 		carService.getOrders();
 		carService.sortOrdersByPrice();
-		
+
 		carService.getGarages();
 		carService.cancelOrder(order2);
 		carService.getOrders();

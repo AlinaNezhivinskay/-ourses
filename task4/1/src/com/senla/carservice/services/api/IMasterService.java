@@ -1,4 +1,4 @@
-package com.senla.carservice.services.interfaces;
+package com.senla.carservice.services.api;
 
 import java.util.Comparator;
 import java.util.Date;

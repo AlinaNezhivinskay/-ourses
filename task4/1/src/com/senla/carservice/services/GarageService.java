@@ -2,7 +2,7 @@ package com.senla.carservice.services;
 
 import com.senla.carservice.beans.Garage;
 import com.senla.carservice.repositories.GarageRepository;
-import com.senla.carservice.services.interfaces.IGarageService;
+import com.senla.carservice.services.api.IGarageService;
 import com.senla.carservice.utils.ArrayWorker;
 
 public class GarageService implements IGarageService {
