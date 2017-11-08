@@ -1,4 +1,4 @@
-package com.senla.carservice.services.interfaces;
+package com.senla.carservice.services.api;
 
 import com.senla.carservice.beans.Garage;
 

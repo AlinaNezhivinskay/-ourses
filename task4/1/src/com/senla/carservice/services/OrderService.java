@@ -7,7 +7,7 @@ import java.util.Date;
 import com.senla.carservice.beans.Master;
 import com.senla.carservice.beans.Order;
 import com.senla.carservice.repositories.OrderRepository;
-import com.senla.carservice.services.interfaces.IOrderService;
+import com.senla.carservice.services.api.IOrderService;
 import com.senla.carservice.utils.ArrayWorker;
 import com.senla.carservice.utils.DateWorker;
 import com.senla.carservice.orderstate.OrderState;
@@ -26,13 +26,7 @@ public class OrderService implements IOrderService {
 
 	@Override
 	public boolean removeOrder(Order order) {
-		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)].getGarage()
-				.setIsFree(true);
-		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)].getMaster()
-				.setIsFree(true);
-		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)]
-				.setExecutionDate(new Date());
-		return orderRepository.removeOrder(order);
+		return changeOrderState(order, OrderState.REMOTE);
 	}
 
 	@Override
@@ -42,31 +36,28 @@ public class OrderService implements IOrderService {
 
 	@Override
 	public boolean closeOrder(Order order) {
-		if (!ArrayWorker.isElementOnArray(orderRepository.getOrders(), order))
-			return false;
-		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)].getGarage()
-				.setIsFree(true);
-		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)].getMaster()
-				.setIsFree(true);
-		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)]
-				.setExecutionDate(new Date());
-		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)]
-				.setState(OrderState.EXECUTED);
-		return true;
+		return changeOrderState(order, OrderState.EXECUTED);
 	}
 
 	@Override
 	public boolean cancelOrder(Order order) {
+		return changeOrderState(order, OrderState.CANCELED);
+	}
+
+	private boolean changeOrderState(Order order, OrderState state) {
 		if (!ArrayWorker.isElementOnArray(orderRepository.getOrders(), order))
 			return false;
 		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)].getGarage()
 				.setIsFree(true);
-		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)].getMaster()
-				.setIsFree(true);
+		if (orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)]
+				.getMaster() != null) {
+			orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)]
+					.getMaster().setIsFree(true);
+		}
 		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)]
 				.setExecutionDate(new Date());
 		orderRepository.getOrders()[ArrayWorker.getPositionOfElement(orderRepository.getOrders(), order)]
-				.setState(OrderState.CANCELED);
+				.setState(state);
 		return true;
 	}
 

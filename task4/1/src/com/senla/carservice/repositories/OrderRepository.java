@@ -45,7 +45,7 @@ public class OrderRepository {
 	public boolean removeOrder(Order order) {
 		if (!ArrayWorker.isElementOnArray(orders, order))
 			return false;
-		orders[ArrayWorker.getPositionOfElement(orders, order)].setState(OrderState.REMOTE);
+		orders[ArrayWorker.getPositionOfElement(orders, order)] = null;
 		return true;
 	}
 

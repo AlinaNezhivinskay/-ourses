@@ -6,7 +6,7 @@ import java.util.Date;
 
 import com.senla.carservice.beans.Master;
 import com.senla.carservice.repositories.MasterRepository;
-import com.senla.carservice.services.interfaces.IMasterService;
+import com.senla.carservice.services.api.IMasterService;
 
 public class MasterService implements IMasterService {
 	private MasterRepository masterRepository;
