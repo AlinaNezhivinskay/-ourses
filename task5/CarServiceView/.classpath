@@ -4,5 +4,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/CarServiceController"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/CarServiceModel"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/CarServiceApi"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/CarServiceUtil"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

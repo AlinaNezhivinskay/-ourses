@@ -5,7 +5,6 @@ import java.util.Date;
 
 import com.senla.carservice.model.beans.abstractentity.Entity;
 import com.senla.carservice.model.orderstate.OrderState;
-import com.senla.carservice.model.utils.DateWorker;
 
 public class Order extends Entity {
 	private long id;
@@ -17,10 +16,11 @@ public class Order extends Entity {
 	private Garage garage;
 	private Master master;
 
-	public Order(Date submissionDate, Date executionDate, Date plannedStartDate, double price, Garage garage)throws ParseException {
-		this.submissionDate = DateWorker.formatDate(submissionDate);
-		this.executionDate = DateWorker.formatDate(executionDate);
-		this.plannedStartDate = DateWorker.formatDate(plannedStartDate);
+	public Order(Date submissionDate, Date executionDate, Date plannedStartDate, double price, Garage garage)
+			throws ParseException {
+		this.submissionDate = submissionDate;
+		this.executionDate = executionDate;
+		this.plannedStartDate = plannedStartDate;
 		this.price = price;
 		state = OrderState.EXECUTABLE;
 		garage.setIsFree(false);
@@ -28,7 +28,7 @@ public class Order extends Entity {
 	}
 
 	public Order(long id, Date submissionDate, Date executionDate, Date plannedStartDate, double price,
-			OrderState state, Garage garage, Master master)throws ParseException {
+			OrderState state, Garage garage, Master master) throws ParseException {
 		this(submissionDate, executionDate, plannedStartDate, price, garage);
 		this.id = id;
 		this.state = state;
@@ -81,6 +81,10 @@ public class Order extends Entity {
 		return master;
 	}
 
+	public void setMaster(Master master) {
+		this.master = master;
+	}
+
 	@Override
 	public boolean equils(Object o) {
 		return (id == ((Order) o).getId()) ? true : false;
@@ -89,11 +93,10 @@ public class Order extends Entity {
 	@Override
 	public String toString() {
 		StringBuilder str = new StringBuilder();
-		str.append(id).append(' ').append("submissionDate: ").append(DateWorker.format(submissionDate)).append(' ')
-				.append("executionDate: ").append(DateWorker.format(executionDate)).append(' ')
-				.append("plannedStartDate: ").append(DateWorker.format(plannedStartDate)).append(' ').append(price)
-				.append(' ').append(state).append(' ').append("garage: ").append(garage.getId()).append(' ')
-				.append(garage.getIsFree());
+		str.append(id).append(' ').append("submissionDate: ").append(submissionDate).append(' ')
+				.append("executionDate: ").append(executionDate).append(' ').append("plannedStartDate: ")
+				.append(plannedStartDate).append(' ').append(price).append(' ').append(state).append(' ')
+				.append("garage: ").append(garage.getId()).append(' ').append(garage.getIsFree());
 		return str.toString();
 	}
 }
