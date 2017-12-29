@@ -86,7 +86,7 @@ public class CsvConverter {
 						Class<?> repositoryClass = Class.forName(repositoryStr);
 						Method getInstance = repositoryClass.getMethod("getInstance");
 						String getByIdStr = "get" + fieldClass.getSimpleName();
-						Method getByIdMethod = repositoryClass.getMethod(getByIdStr, new Class[] { long.class });
+						Method getByIdMethod = repositoryClass.getMethod(getByIdStr, new Class[] { Long.class });
 						if(components.length<columnNumber) {
 							field.set(entity, null);
 						}

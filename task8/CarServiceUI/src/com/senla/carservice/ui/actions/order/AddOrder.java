@@ -34,14 +34,15 @@ public class AddOrder implements IAction {
 		Printer.print((List<Garage>) responce.get("value"));
 
 		Printer.print("Choose Garage");
-		List<Object> paramsGarage = new ArrayList<>();
-		params.add(Reader.readInt());
+		params = new ArrayList<>();
+		params.add(Reader.readLong());
 		request = new HashMap<>();
-		request.put(Commands.getGarageById, paramsGarage);
+		request.put(Commands.getGarageById, params);
 		responce = ClientHandler.handle(request);
 
 		Garage garage = (Garage) responce.get("value");
 		try {
+			params = new ArrayList<>();
 			params.add(new Order(new Date(), executionDate, plannedStartDate, price, garage));
 			request = new HashMap<>();
 			request.put(Commands.addOrder, params);

@@ -20,6 +20,20 @@ public class Reader {
 		} while (number == null);
 		return number;
 	}
+	
+	public static long readLong() {
+		String str;
+		Long number = null;
+		do {
+			str = in.nextLine();
+			try {
+				number = Long.parseLong(str);
+			} catch (NumberFormatException ex) {
+
+			}
+		} while (number == null);
+		return number;
+	}
 
 	public static double readDouble() {
 		String str;

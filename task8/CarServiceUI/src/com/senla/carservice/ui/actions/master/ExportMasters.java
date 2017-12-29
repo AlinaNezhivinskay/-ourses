@@ -29,9 +29,8 @@ public class ExportMasters implements IAction {
 			Printer.print(mastersInRep);
 			Printer.print("Choose masters to export (1-end input,2-all)");
 			List<Master> masters = new ArrayList<Master>();
-			int index;
-			do {
-				index = Reader.readInt();
+			long index = Reader.readLong();
+			while (index != 1 && index != 2) {
 
 				params = new ArrayList<>();
 				params.add(index);
@@ -43,7 +42,8 @@ public class ExportMasters implements IAction {
 				if (master != null) {
 					masters.add(master);
 				}
-			} while (index != 1 && index != 2);
+				index = Reader.readLong();
+			}
 			if (index == 2) {
 				request = new HashMap<>();
 				request.put(Commands.getMasters, null);

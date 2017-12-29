@@ -24,7 +24,7 @@ public class GetCopy implements IAction {
 		Printer.print("Choose Order to copy");
 
 		List<Object> params = new ArrayList<>();
-		params.add(Reader.readInt());
+		params.add(Reader.readLong());
 		request = new HashMap<>();
 		request.put(Commands.getOrderById, params);
 		responce = ClientHandler.handle(request);

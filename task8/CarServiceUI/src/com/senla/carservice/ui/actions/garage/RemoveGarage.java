@@ -27,7 +27,7 @@ public class RemoveGarage implements IAction {
 
 		Printer.print("Choose garage to remove");
 		params = new ArrayList<>();
-		params.add(Reader.readInt());
+		params.add(Reader.readLong());
 		request = new HashMap<>();
 		request.put(Commands.getGarageById, params);
 		responce = ClientHandler.handle(request);
@@ -42,8 +42,9 @@ public class RemoveGarage implements IAction {
 
 		if ((boolean) responce.get("value")) {
 			Printer.print("Removal was successful");
+		} else {
+			Printer.print("Removal was NOT successful");
 		}
-		Printer.print("Removal was NOT successful");
 
 	}
 

@@ -14,7 +14,7 @@ public interface ICarService {
 
 	List<Garage> getGarages();
 
-	Garage getGarageById(long id);
+	Garage getGarageById(Long id);
 
 	void addMaster(Master master);
 
@@ -24,7 +24,7 @@ public interface ICarService {
 
 	List<Master> getFreeMasters();
 
-	Master getMasterById(long id);
+	Master getMasterById(Long id);
 
 	void addOrder(Order order);
 
@@ -42,7 +42,7 @@ public interface ICarService {
 
 	List<Order> getOrders();
 
-	Order getOrderById(long id);
+	Order getOrderById(Long id);
 
 	List<Order> getCurrentExecutingOrders();
 

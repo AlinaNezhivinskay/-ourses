@@ -28,7 +28,7 @@ public class GarageRepository implements IGarageRepository {
 	}
 
 	@Override
-	public Garage getGarage(long id) {
+	public Garage getGarage(Long id) {
 		for (Garage garage : garages) {
 			if (garage.getId() == id)
 				return garage;
@@ -38,10 +38,6 @@ public class GarageRepository implements IGarageRepository {
 
 	@Override
 	public boolean addGarage(Garage garage) {
-		if (garages.contains(garage)) {
-			this.updateGarage(garage, garage.getIsFree());
-			return true;
-		}
 		garage.setId(lastId);
 		incrementLastId();
 		return garages.add(garage);

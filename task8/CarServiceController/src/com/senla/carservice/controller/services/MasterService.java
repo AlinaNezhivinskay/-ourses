@@ -64,7 +64,7 @@ public class MasterService implements IMasterService {
 	}
 
 	@Override
-	public Master getMasterById(long id) {
+	public Master getMasterById(Long id) {
 		return masterRepository.getMaster(id);
 	}
 

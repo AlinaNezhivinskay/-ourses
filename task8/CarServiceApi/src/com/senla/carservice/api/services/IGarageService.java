@@ -10,7 +10,7 @@ import com.senla.carservice.model.beans.Garage;
 public interface IGarageService {
 	List<Garage> getGarages();
 
-	Garage getGarageById(long id);
+	Garage getGarageById(Long id);
 
 	void addGarage(Garage garage);
 

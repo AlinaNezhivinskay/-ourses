@@ -7,7 +7,7 @@ import com.senla.carservice.model.beans.Master;
 public interface IMasterRepository {
 	List<Master> getMasters();
 
-	Master getMaster(long id);
+	Master getMaster(Long id);
 
 	boolean addMaster(Master master);
 

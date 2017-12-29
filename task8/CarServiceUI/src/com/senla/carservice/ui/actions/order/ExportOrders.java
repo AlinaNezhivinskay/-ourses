@@ -30,11 +30,9 @@ public class ExportOrders implements IAction {
 			Printer.print(ordersInRep);
 			Printer.print("Choose orders to export (1-end input,2-all)");
 			List<Order> orders = new ArrayList<Order>();
-			int index;
-			do {
-
+			long index = Reader.readLong();
+			while (index != 1 && index != 2) {
 				params = new ArrayList<>();
-				index = Reader.readInt();
 				params.add(index);
 				request = new HashMap<>();
 				request.put(Commands.getOrderById, params);
@@ -44,7 +42,8 @@ public class ExportOrders implements IAction {
 				if (order != null) {
 					orders.add(order);
 				}
-			} while (index != 1 && index != 2);
+				index = Reader.readLong();
+			}
 			if (index == 2) {
 				request = new HashMap<>();
 				request.put(Commands.getOrders, null);

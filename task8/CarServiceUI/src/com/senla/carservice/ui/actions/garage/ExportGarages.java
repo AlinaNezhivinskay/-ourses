@@ -30,9 +30,8 @@ public class ExportGarages implements IAction {
 			Printer.print(garagesInRep);
 			Printer.print("Choose garages to export (1-end input,2-all)");
 			List<Garage> garages = new ArrayList<Garage>();
-			int index;
-			do {
-				index = Reader.readInt();
+			long index = Reader.readLong();
+			while (index != 1 && index != 2) {
 
 				params = new ArrayList<>();
 				params.add(index);
@@ -44,13 +43,14 @@ public class ExportGarages implements IAction {
 				if (garage != null) {
 					garages.add(garage);
 				}
-			} while (index != 1 && index != 2);
+				index = Reader.readLong();
+			}
 			if (index == 2) {
 				garages = garagesInRep;
 			}
 
 			params = new ArrayList<>();
-			params.add(garages);
+			params.add((List<Garage>) garages);
 			request = new HashMap<>();
 			request.put(Commands.exportGarages, params);
 			ClientHandler.handle(request);

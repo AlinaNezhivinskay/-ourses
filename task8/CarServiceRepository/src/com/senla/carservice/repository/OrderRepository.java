@@ -29,7 +29,7 @@ public class OrderRepository implements IOrderRepository {
 	}
 
 	@Override
-	public Order getOrder(long id) {
+	public Order getOrder(Long id) {
 		for (Order order : orders) {
 			if (order.getId() == id)
 				return order;
@@ -39,10 +39,6 @@ public class OrderRepository implements IOrderRepository {
 
 	@Override
 	public boolean addOrder(Order order) {
-		if (orders.contains(order)) {
-			this.updateOrder(order);
-			return true;
-		}
 		order.setId(lastId);
 		incrementLastId();
 		return orders.add(order);

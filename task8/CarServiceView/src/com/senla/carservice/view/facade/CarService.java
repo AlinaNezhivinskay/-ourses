@@ -53,82 +53,82 @@ public class CarService implements ICarService {
 	}
 
 	@Override
-	public void addGarage(Garage garage) {
+	public synchronized void addGarage(Garage garage) {
 		garageService.addGarage(garage);
 	}
 
 	@Override
-	public boolean removeGarage(Garage garage) {
+	public synchronized boolean removeGarage(Garage garage) {
 		return garageService.removeGarage(garage);
 	}
 
 	@Override
-	public List<Garage> getGarages() {
+	public synchronized List<Garage> getGarages() {
 		return garageService.getGarages();
 	}
 
 	@Override
-	public void addMaster(Master master) {
+	public synchronized void addMaster(Master master) {
 		masterService.addMaster(master);
 	}
 
 	@Override
-	public boolean removeMaster(Master master) {
+	public synchronized boolean removeMaster(Master master) {
 		return masterService.removeMaster(master);
 	}
 
 	@Override
-	public List<Master> getMasters() {
+	public synchronized List<Master> getMasters() {
 		return masterService.getMasters();
 	}
 
 	@Override
-	public void addOrder(Order order) {
+	public synchronized void addOrder(Order order) {
 		orderService.addOrder(order);
 	}
 
 	@Override
-	public boolean removeOrder(Order order) {
+	public synchronized boolean removeOrder(Order order) {
 		return orderService.removeOrder(order);
 	}
 
 	@Override
-	public boolean closeOrder(Order order) {
+	public synchronized boolean closeOrder(Order order) {
 		return orderService.closeOrder(order);
 	}
 
 	@Override
-	public boolean cancelOrder(Order order) {
+	public synchronized boolean cancelOrder(Order order) {
 		return orderService.cancelOrder(order);
 	}
 
 	@Override
-	public List<Garage> getFreeGarages() {
+	public synchronized List<Garage> getFreeGarages() {
 		return garageService.getFreeGarages();
 	}
 
 	@Override
-	public List<Order> getOrders() {
+	public synchronized List<Order> getOrders() {
 		return orderService.getOrders();
 	}
 
 	@Override
-	public List<Order> getCurrentExecutingOrders() {
+	public synchronized List<Order> getCurrentExecutingOrders() {
 		return orderService.getCurrentExecutingOrders();
 	}
 
 	@Override
-	public Order getOrderByMaster(Master master) {
+	public synchronized Order getOrderByMaster(Master master) {
 		return orderService.getOrderByMaster(master);
 	}
 
 	@Override
-	public Master getMasterByOrder(Order order) {
+	public synchronized Master getMasterByOrder(Order order) {
 		return orderService.getMasterByOrder(order);
 	}
 
 	@Override
-	public List<Order> getExecutedOrders(Date startDate, Date endDate) {
+	public synchronized List<Order> getExecutedOrders(Date startDate, Date endDate) {
 		try {
 			return orderService.getOrders(OrderState.EXECUTED, DateWorker.formatDate(startDate),
 					DateWorker.formatDate(endDate));
@@ -139,7 +139,7 @@ public class CarService implements ICarService {
 	}
 
 	@Override
-	public List<Order> getCanceledOrders(Date startDate, Date endDate) {
+	public synchronized List<Order> getCanceledOrders(Date startDate, Date endDate) {
 		try {
 			return orderService.getOrders(OrderState.CANCELED, DateWorker.formatDate(startDate),
 					DateWorker.formatDate(endDate));
@@ -150,7 +150,7 @@ public class CarService implements ICarService {
 	}
 
 	@Override
-	public List<Order> getRemoteOrders(Date startDate, Date endDate) {
+	public synchronized List<Order> getRemoteOrders(Date startDate, Date endDate) {
 		try {
 			return orderService.getOrders(OrderState.REMOTE, DateWorker.formatDate(startDate),
 					DateWorker.formatDate(endDate));
@@ -161,7 +161,7 @@ public class CarService implements ICarService {
 	}
 
 	@Override
-	public int getFreeCarServicePlaceNum(Date date) {
+	public synchronized int getFreeCarServicePlaceNum(Date date) {
 		try {
 			date = DateWorker.formatDate(date);
 			int freeMasters = masterService.getFreeMastersNumber(date) + orderService.getFreeMasterNumber(date);
@@ -175,7 +175,7 @@ public class CarService implements ICarService {
 	}
 
 	@Override
-	public Date getFreeDate() {
+	public synchronized Date getFreeDate() {
 		try {
 			Date date = new Date();
 			date = DateWorker.formatDate(date);
@@ -190,74 +190,74 @@ public class CarService implements ICarService {
 	}
 
 	@Override
-	public void sortOrdersBySubmissionDate() {
+	public synchronized void sortOrdersBySubmissionDate() {
 		orderService.sort(new SubmissionDateComparator());
 	}
 
 	@Override
-	public void sortOrdersByExecutionDate() {
+	public synchronized void sortOrdersByExecutionDate() {
 		orderService.sort(new ExecutionDateComparator());
 	}
 
 	@Override
-	public void sortOrdersByPlannedStartDate() {
+	public synchronized void sortOrdersByPlannedStartDate() {
 		orderService.sort(new PlannedStartDateComparator());
 	}
 
 	@Override
-	public void sortOrdersByPrice() {
+	public synchronized void sortOrdersByPrice() {
 		orderService.sort(new PriceComparator());
 	}
 
 	@Override
-	public void sortMastersByAlphabetAscending() {
+	public synchronized void sortMastersByAlphabetAscending() {
 		masterService.sort(new AscendingAlphabetComparator());
 
 	}
 
 	@Override
-	public void sortMastersByAlphabetDescending() {
+	public synchronized void sortMastersByAlphabetDescending() {
 		masterService.sort(new DescendingAlphabetComparator());
 
 	}
 
 	@Override
-	public void sortMastersByEmployment() {
+	public synchronized void sortMastersByEmployment() {
 		masterService.sort(new EmploymentComparator());
 	}
 
 	@Override
-	public void sortExecutingOrdersBySubmissionDate() {
+	public synchronized void sortExecutingOrdersBySubmissionDate() {
 		sortOrdersBySubmissionDate(orderService.getCurrentExecutingOrders());
 	}
 
 	@Override
-	public void sortExecutingOrdersByExecutionDate() {
+	public synchronized void sortExecutingOrdersByExecutionDate() {
 		sortOrdersByExecutionDate(orderService.getCurrentExecutingOrders());
 	}
 
 	@Override
-	public void sortExecutingOrdersByPrice() {
+	public synchronized void sortExecutingOrdersByPrice() {
 		sortOrdersByPrice(orderService.getCurrentExecutingOrders());
 	}
 
 	@Override
-	public void sortOrdersBySubmissionDate(List<Order> orders) {
+	public synchronized void sortOrdersBySubmissionDate(List<Order> orders) {
 		orderService.sort(new SubmissionDateComparator(), orders);
 	}
 
 	@Override
-	public void sortOrdersByExecutionDate(List<Order> orders) {
+	public synchronized void sortOrdersByExecutionDate(List<Order> orders) {
 		orderService.sort(new ExecutionDateComparator(), orders);
 	}
 
 	@Override
-	public void sortOrdersByPrice(List<Order> orders) {
+	public synchronized void sortOrdersByPrice(List<Order> orders) {
 		orderService.sort(new PriceComparator(), orders);
 	}
 
 	@Override
-	public boolean exit() {
+	public synchronized boolean exit() {
 		List<List<? extends Entity>> list = new ArrayList<>();
 		List<Garage> garages = garageService.getGarages();
 		garages.sort(new IdComparator());
@@ -294,48 +294,48 @@ public class CarService implements ICarService {
 	}
 
 	@Override
-	public Garage getGarageById(long id) {
+	public synchronized Garage getGarageById(Long id) {
 		return garageService.getGarageById(id);
 	}
 
 	@Override
-	public Master getMasterById(long id) {
+	public synchronized Master getMasterById(Long id) {
 		return masterService.getMasterById(id);
 	}
 
 	@Override
-	public Order getOrderById(long id) {
+	public synchronized Order getOrderById(Long id) {
 		return orderService.getOrderById(id);
 	}
 
 	@Override
-	public void shiftExecution(int daysNum) {
+	public synchronized void shiftExecution(int daysNum) {
 		orderService.shiftExecution(daysNum);
 
 	}
 
 	@Override
-	public boolean assignMasterToOrder(Order order, Master master) {
+	public synchronized boolean assignMasterToOrder(Order order, Master master) {
 		return orderService.assignMasterToOrder(order, master);
 	}
 
 	@Override
-	public boolean assignGarageToOrder(Order order, Garage garage) {
+	public synchronized boolean assignGarageToOrder(Order order, Garage garage) {
 		return orderService.assignGarageToOrder(order, garage);
 	}
 
 	@Override
-	public List<Master> getFreeMasters() {
+	public synchronized List<Master> getFreeMasters() {
 		return masterService.getFreeMasters();
 	}
 
 	@Override
-	public boolean updateOrder(Order order) {
+	public synchronized boolean updateOrder(Order order) {
 		return orderService.updateOrder(order);
 	}
 
 	@Override
-	public Order getCopy(Order order) {
+	public synchronized Order getCopy(Order order) {
 		try {
 			return orderService.getCopy(order);
 		} catch (CloneNotSupportedException e) {
@@ -345,7 +345,7 @@ public class CarService implements ICarService {
 	}
 
 	@Override
-	public boolean exportGarages(List<Garage> garages) {
+	public synchronized boolean exportGarages(List<Garage> garages) {
 		try {
 			return garageService.exportGarages(garages);
 		} catch (IOException e) {
@@ -360,7 +360,7 @@ public class CarService implements ICarService {
 	}
 
 	@Override
-	public boolean importGarages() {
+	public synchronized boolean importGarages() {
 		try {
 			return garageService.importGarages();
 		} catch (FileNotFoundException e) {
@@ -399,7 +399,7 @@ public class CarService implements ICarService {
 	}
 
 	@Override
-	public boolean importMasters() {
+	public synchronized boolean importMasters() {
 		try {
 			return masterService.importMasters();
 		} catch (FileNotFoundException e) {
@@ -437,7 +437,7 @@ public class CarService implements ICarService {
 	}
 
 	@Override
-	public boolean importOrders() {
+	public synchronized boolean importOrders() {
 		try {
 			return orderService.importOrders();
 		} catch (FileNotFoundException e) {

@@ -66,7 +66,7 @@ public class GarageService implements IGarageService {
 	}
 
 	@Override
-	public Garage getGarageById(long id) {
+	public Garage getGarageById(Long id) {
 		return garageRepository.getGarage(id);
 	}
 

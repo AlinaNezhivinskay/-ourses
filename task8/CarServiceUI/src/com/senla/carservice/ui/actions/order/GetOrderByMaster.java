@@ -26,7 +26,7 @@ public class GetOrderByMaster implements IAction {
 		Printer.print("Choose Master");
 
 		params = new ArrayList<>();
-		params.add(Reader.readInt());
+		params.add(Reader.readLong());
 		request = new HashMap<>();
 		request.put(Commands.getMasterById, params);
 		responce = ClientHandler.handle(request);

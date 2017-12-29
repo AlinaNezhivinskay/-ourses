@@ -8,7 +8,7 @@ public interface IGarageRepository {
 
 	List<Garage> getGarages();
 
-	Garage getGarage(long id);
+	Garage getGarage(Long id);
 
 	boolean addGarage(Garage garage);
 

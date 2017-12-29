@@ -163,7 +163,7 @@ public class OrderService implements IOrderService {
 	}
 
 	@Override
-	public Order getOrderById(long id) {
+	public Order getOrderById(Long id) {
 		return orderRepository.getOrder(id);
 	}
 

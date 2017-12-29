@@ -26,7 +26,7 @@ public class AssignMasterToOrder implements IAction {
 
 		Printer.print("Choose order");
 		List<Object> params = new ArrayList<>();
-		params.add(Reader.readInt());
+		params.add(Reader.readLong());
 		request = new HashMap<>();
 		request.put(Commands.getOrderById, params);
 		responce = ClientHandler.handle(request);
@@ -40,7 +40,7 @@ public class AssignMasterToOrder implements IAction {
 
 		Printer.print("Choose master");
 		params = new ArrayList<>();
-		params.add(Reader.readInt());
+		params.add(Reader.readLong());
 		request = new HashMap<>();
 		request.put(Commands.getMasterById, params);
 		responce = ClientHandler.handle(request);

@@ -25,7 +25,7 @@ public class UpdateOrder implements IAction {
 		Printer.print((List<Order>) responce.get("value"));
 		Printer.print("Choose Order to change");
 		List<Object> params = new ArrayList<>();
-		params.add(Reader.readInt());
+		params.add(Reader.readLong());
 		request = new HashMap<>();
 		request.put(Commands.getOrderById, params);
 		responce = ClientHandler.handle(request);
@@ -67,7 +67,7 @@ public class UpdateOrder implements IAction {
 				Printer.print("Choose garage");
 
 				params = new ArrayList<>();
-				params.add(Reader.readInt());
+				params.add(Reader.readLong());
 				request = new HashMap<>();
 				request.put(Commands.getGarageById, params);
 				responce = ClientHandler.handle(request);
@@ -93,7 +93,7 @@ public class UpdateOrder implements IAction {
 
 				Printer.print("Choose master");
 				params = new ArrayList<>();
-				params.add(Reader.readInt());
+				params.add(Reader.readLong());
 				request = new HashMap<>();
 				request.put(Commands.getMasterById, params);
 				responce = ClientHandler.handle(request);

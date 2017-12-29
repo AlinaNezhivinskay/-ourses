@@ -27,6 +27,7 @@ public class ServerThread extends Thread {
 		try {
 			while ((request = is.readObject()) != null) {
 				os.writeObject(Handler.handleRequest((Map<Commands, List<Object>>) request));
+				os.flush();
 			}
 		} catch (IOException | ClassNotFoundException | NoSuchMethodException | IllegalAccessException
 				| InvocationTargetException e) {

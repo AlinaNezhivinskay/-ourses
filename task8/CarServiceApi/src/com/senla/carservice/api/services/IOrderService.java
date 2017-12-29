@@ -13,7 +13,7 @@ import com.senla.carservice.model.beans.Order;
 import com.senla.carservice.model.orderstate.OrderState;
 
 public interface IOrderService {
-	Order getOrderById(long id);
+	Order getOrderById(Long id);
 
 	void addOrder(Order order);
 

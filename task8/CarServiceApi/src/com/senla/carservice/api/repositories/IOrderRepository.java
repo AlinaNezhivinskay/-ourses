@@ -8,7 +8,7 @@ import com.senla.carservice.model.orderstate.OrderState;
 public interface IOrderRepository {
 	List<Order> getOrders();
 
-	Order getOrder(long id);
+	Order getOrder(Long id);
 
 	boolean addOrder(Order order);
 

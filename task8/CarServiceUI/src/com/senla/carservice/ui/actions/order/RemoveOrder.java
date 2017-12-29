@@ -24,7 +24,7 @@ public class RemoveOrder implements IAction {
 		Printer.print("Choose Order to remove");
 
 		List<Object> params = new ArrayList<>();
-		params.add(Reader.readInt());
+		params.add(Reader.readLong());
 		request = new HashMap<>();
 		request.put(Commands.getOrderById, params);
 		responce = ClientHandler.handle(request);
@@ -39,8 +39,9 @@ public class RemoveOrder implements IAction {
 
 		if ((boolean) responce.get("value")) {
 			Printer.print("Removal was successful");
+		} else {
+			Printer.print("Removal was NOT successful");
 		}
-		Printer.print("Removal was NOT successful");
 
 	}
 

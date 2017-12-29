@@ -28,7 +28,7 @@ public class MasterRepository implements IMasterRepository {
 	}
 
 	@Override
-	public Master getMaster(long id) {
+	public Master getMaster(Long id) {
 		for (Master master : masters) {
 			if (master.getId() == id)
 				return master;
@@ -38,10 +38,6 @@ public class MasterRepository implements IMasterRepository {
 
 	@Override
 	public boolean addMaster(Master master) {
-		if (masters.contains(master)) {
-			this.updateMaster(master, master.getIsFree());
-			return true;
-		}
 		master.setId(lastId);
 		incrementLastId();
 		return masters.add(master);

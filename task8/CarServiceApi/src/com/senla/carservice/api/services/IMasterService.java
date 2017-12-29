@@ -12,7 +12,7 @@ import com.senla.carservice.model.beans.Master;
 public interface IMasterService {
 	void addMaster(Master master);
 
-	Master getMasterById(long id);
+	Master getMasterById(Long id);
 
 	boolean removeMaster(Master master);
 
