@@ -20,17 +20,17 @@ public class GarageService implements IGarageService {
 	}
 
 	@Override
-	public void addGarage(Garage garage) {
+	public synchronized void addGarage(Garage garage) {
 		garageRepository.addGarage(garage);
 	}
 
 	@Override
-	public boolean removeGarage(Garage garage) {
+	public synchronized boolean removeGarage(Garage garage) {
 		return garageRepository.removeGarage(garage);
 	}
 
 	@Override
-	public boolean updateGarage(Garage garage, boolean isFree) {
+	public synchronized boolean updateGarage(Garage garage, boolean isFree) {
 		return garageRepository.updateGarage(garage, isFree);
 	}
 
@@ -56,7 +56,7 @@ public class GarageService implements IGarageService {
 	}
 
 	@Override
-	public void restoreData(List<Garage> garages) {
+	public synchronized void restoreData(List<Garage> garages) {
 		garageRepository.restoreData(garages);
 	}
 
@@ -77,7 +77,7 @@ public class GarageService implements IGarageService {
 	}
 
 	@Override
-	public boolean importGarages()
+	public synchronized boolean importGarages()
 			throws FileNotFoundException, IOException, IllegalAccessException, NoSuchFieldException,
 			InstantiationException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
 		@SuppressWarnings("unchecked")

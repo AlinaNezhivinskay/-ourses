@@ -22,22 +22,22 @@ public class MasterService implements IMasterService {
 	}
 
 	@Override
-	public void addMaster(Master master) {
+	public synchronized void addMaster(Master master) {
 		masterRepository.addMaster(master);
 	}
 
 	@Override
-	public boolean removeMaster(Master master) {
+	public synchronized boolean removeMaster(Master master) {
 		return masterRepository.removeMaster(master);
 	}
 
 	@Override
-	public boolean updateMaster(Master master, boolean isFree) {
+	public synchronized boolean updateMaster(Master master, boolean isFree) {
 		return masterRepository.updateMaster(master, isFree);
 	}
 
 	@Override
-	public void restoreData(List<Master> masters) {
+	public synchronized void restoreData(List<Master> masters) {
 		masterRepository.restoreData(masters);
 	}
 
@@ -86,7 +86,7 @@ public class MasterService implements IMasterService {
 	}
 
 	@Override
-	public boolean importMasters()
+	public synchronized boolean importMasters()
 			throws FileNotFoundException, IOException, IllegalAccessException, NoSuchFieldException,
 			InstantiationException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
 		@SuppressWarnings("unchecked")

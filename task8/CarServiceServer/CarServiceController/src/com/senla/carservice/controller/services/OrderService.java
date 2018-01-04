@@ -26,27 +26,27 @@ public class OrderService implements IOrderService {
 	}
 
 	@Override
-	public void addOrder(Order order) {
+	public synchronized void addOrder(Order order) {
 		orderRepository.addOrder(order);
 	}
 
 	@Override
-	public boolean removeOrder(Order order) {
+	public synchronized boolean removeOrder(Order order) {
 		return changeOrderState(order, OrderState.REMOTE);
 	}
 
 	@Override
-	public boolean updateOrderState(Order order, OrderState state) {
+	public synchronized boolean updateOrderState(Order order, OrderState state) {
 		return orderRepository.updateOrderState(order, state);
 	}
 
 	@Override
-	public boolean closeOrder(Order order) {
+	public synchronized boolean closeOrder(Order order) {
 		return changeOrderState(order, OrderState.EXECUTED);
 	}
 
 	@Override
-	public boolean cancelOrder(Order order) {
+	public synchronized boolean cancelOrder(Order order) {
 		return changeOrderState(order, OrderState.CANCELED);
 	}
 
@@ -64,7 +64,7 @@ public class OrderService implements IOrderService {
 	}
 
 	@Override
-	public void shiftExecution(int daysNum) {
+	public synchronized void shiftExecution(int daysNum) {
 		for (Order order : orderRepository.getOrders()) {
 			order.setExecutionDate(DateWorker.shiftDate(order.getExecutionDate(), daysNum));
 		}
@@ -109,7 +109,7 @@ public class OrderService implements IOrderService {
 	}
 
 	@Override
-	public void restoreData(List<Order> orders) {
+	public synchronized void restoreData(List<Order> orders) {
 		orderRepository.restoreData(orders);
 	}
 
@@ -168,7 +168,7 @@ public class OrderService implements IOrderService {
 	}
 
 	@Override
-	public boolean assignMasterToOrder(Order order, Master master) {
+	public synchronized boolean assignMasterToOrder(Order order, Master master) {
 		if (order.getMaster() != null) {
 			order.getMaster().setIsFree(true);
 		}
@@ -181,7 +181,7 @@ public class OrderService implements IOrderService {
 	}
 
 	@Override
-	public boolean assignGarageToOrder(Order order, Garage garage) {
+	public synchronized boolean assignGarageToOrder(Order order, Garage garage) {
 		if (order.getGarage() != null) {
 			order.getGarage().setIsFree(true);
 		}
@@ -199,7 +199,7 @@ public class OrderService implements IOrderService {
 	}
 
 	@Override
-	public boolean updateOrder(Order order) {
+	public synchronized boolean updateOrder(Order order) {
 		return orderRepository.updateOrder(order);
 	}
 
@@ -209,7 +209,7 @@ public class OrderService implements IOrderService {
 	}
 
 	@Override
-	public boolean importOrders()
+	public synchronized boolean importOrders()
 			throws FileNotFoundException, IOException, IllegalAccessException, NoSuchFieldException,
 			InstantiationException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
 		@SuppressWarnings("unchecked")

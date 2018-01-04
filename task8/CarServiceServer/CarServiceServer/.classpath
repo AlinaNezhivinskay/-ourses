@@ -5,5 +5,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/CarServiceUtil"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/CarServiceApi"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/CarServiceView"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/CarServiceModel"/>
+	<classpathentry kind="lib" path="C:/Users/Алина/eclipse-workspace/log4j-1.2.17.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

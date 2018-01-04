@@ -8,10 +8,13 @@ import java.net.Socket;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.senla.carservice.server.handler.Handler;
 import com.senla.carservice.util.carservicecommands.Commands;
 
 public class ServerThread extends Thread {
+	private static Logger log = Logger.getLogger(ServerThread.class.getName());
 	private ObjectOutputStream os;
 	private ObjectInputStream is;
 
@@ -29,10 +32,16 @@ public class ServerThread extends Thread {
 				os.writeObject(Handler.handleRequest((Map<Commands, List<Object>>) request));
 				os.flush();
 			}
-		} catch (IOException | ClassNotFoundException | NoSuchMethodException | IllegalAccessException
-				| InvocationTargetException e) {
-			int k = 9 + 2;
-			k = 2;
+		} catch (IOException e) {
+			log.error("IOException", e);
+		} catch (ClassNotFoundException e) {
+			log.error("ClassNotFoundException", e);
+		} catch (NoSuchMethodException e) {
+			log.error("NoSuchMethodException", e);
+		} catch (IllegalAccessException e) {
+			log.error("IllegalAccessException", e);
+		} catch (InvocationTargetException e) {
+			log.error("InvocationTargetException", e);
 		} finally {
 			disconnect();
 		}
@@ -43,7 +52,7 @@ public class ServerThread extends Thread {
 			os.close();
 			is.close();
 		} catch (IOException e) {
-
+			log.error("IOException", e);
 		} finally {
 			this.interrupt();
 		}
