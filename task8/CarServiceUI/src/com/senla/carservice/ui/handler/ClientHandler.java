@@ -9,11 +9,10 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.senla.carservice.ui.Test;
 import com.senla.carservice.util.carservicecommands.Commands;
 
 public class ClientHandler {
-	private static Logger log = Logger.getLogger(Test.class.getName());
+	private static Logger log = Logger.getLogger(ClientHandler.class.getName());
 	static private ObjectOutputStream os;
 	static private ObjectInputStream is;
 
