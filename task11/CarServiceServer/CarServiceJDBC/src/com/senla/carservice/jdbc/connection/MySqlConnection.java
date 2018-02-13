@@ -23,7 +23,7 @@ public class MySqlConnection {
 	private MySqlConnection() {
 		JdbcPropetryRepository properties = JdbcPropetryRepository.getInstance();
 		try {
-
+			DriverManager.registerDriver(new com.mysql.jdbc.Driver());
 			connection = DriverManager.getConnection(properties.getProperty("url"), properties.getProperty("username"),
 					properties.getProperty("userpassword"));
 		} catch (SQLException e) {
