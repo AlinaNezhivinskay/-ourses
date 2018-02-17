@@ -3,14 +3,17 @@ package com.senla.carservice.controller.services;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
+import java.sql.Connection;
 import java.util.Date;
 import java.util.List;
 
 import com.senla.carservice.api.dao.IOrderDAO;
+import com.senla.carservice.api.services.IGarageService;
+import com.senla.carservice.api.services.IMasterService;
 import com.senla.carservice.api.services.IOrderService;
 import com.senla.carservice.csv.fileworker.CsvFileWorker;
 import com.senla.carservice.dao.OrderDAO;
+import com.senla.carservice.jdbc.connection.DBConnector;
 import com.senla.carservice.model.beans.Garage;
 import com.senla.carservice.model.beans.Master;
 import com.senla.carservice.model.beans.Order;
@@ -20,104 +23,155 @@ import com.senla.carservice.util.utils.DateWorker;
 
 public class OrderService implements IOrderService {
 	private IOrderDAO orderDAO;
+	private final DBConnector dBconnector = DBConnector.getInstance();
 
 	public OrderService() {
-		this.orderDAO = OrderDAO.getInstance();
+		this.orderDAO = new OrderDAO();
 	}
 
 	@Override
-	public synchronized void addOrder(Order order) throws SQLException {
-		orderDAO.create(order);
+	public synchronized void addOrder(Order order) throws Exception {
+		orderDAO.create(dBconnector.getConnection(), order);
 	}
 
 	@Override
-	public synchronized boolean removeOrder(Order order) throws SQLException {
-		return orderDAO.updateOrderState(order, OrderState.REMOTE);
+	public synchronized boolean removeOrder(Order order) throws Exception {
+		return updateOrderState(order, OrderState.REMOTE);
 	}
 
 	@Override
-	public synchronized boolean closeOrder(Order order) throws SQLException {
-		return orderDAO.updateOrderState(order, OrderState.EXECUTED);
+	public synchronized boolean closeOrder(Order order) throws Exception {
+		return updateOrderState(order, OrderState.EXECUTED);
+
 	}
 
 	@Override
-	public synchronized boolean cancelOrder(Order order) throws SQLException {
-		return orderDAO.updateOrderState(order, OrderState.CANCELED);
+	public synchronized boolean cancelOrder(Order order) throws Exception {
+		return updateOrderState(order, OrderState.CANCELED);
 	}
 
-	/*
-	 * private boolean changeOrderState(Order order, OrderState state) { List<Order>
-	 * orders = orderRepository.getOrders(); if (!orders.contains(order)) return
-	 * false; orders.get(orders.indexOf(order)).getGarage().setIsFree(true); if
-	 * (orders.get(orders.indexOf(order)).getMaster() != null) {
-	 * orders.get(orders.indexOf(order)).getMaster().setIsFree(true); }
-	 * orders.get(orders.indexOf(order)).setExecutionDate(new Date());
-	 * orderRepository.updateOrderState(order, state); return true; }
-	 */
+	private boolean updateOrderState(Order order, OrderState state) throws Exception {
+		order.setState(state);
+		IGarageService garageService = new GarageService();
+		IMasterService masterService = new MasterService();
+		Connection connection = dBconnector.getConnection();
+		try {
+			boolean stateUpdate = false;
+			connection.setAutoCommit(false);
+			if (order != null) {
+				boolean orderUpdate = orderDAO.update(connection, order);
+				Garage garage = order.getGarage();
+				boolean garageUpdate = garageService.updateGarage(garage, true);
+				Master master = order.getMaster();
+				boolean masterUpdate = true;
+				if (master != null) {
+					masterUpdate = masterService.updateMaster(master, true);
+				}
+				connection.commit();
+				if (orderUpdate && garageUpdate && masterUpdate) {
+					stateUpdate = true;
+				}
+			}
+			connection.setAutoCommit(true);
+			return stateUpdate;
 
-	@Override
-	public synchronized void shiftExecution(int daysNum) throws SQLException {
-		List<Order> orders = orderDAO.getAll();
-		for (Order order : orders) {
-			order.setExecutionDate(DateWorker.shiftDate(order.getExecutionDate(), daysNum));
-			orderDAO.update(order);
+		} catch (Exception e) {
+			connection.rollback();
+			throw e;
 		}
 	}
 
 	@Override
-	public List<Order> getOrders() throws SQLException {
-		return orderDAO.getAll();
+	public synchronized void shiftExecution(int daysNum) throws Exception {
+		List<Order> orders = orderDAO.getAll(dBconnector.getConnection(), null);
+		for (Order order : orders) {
+			order.setExecutionDate(DateWorker.shiftDate(order.getExecutionDate(), daysNum));
+			orderDAO.update(dBconnector.getConnection(), order);
+		}
 	}
 
 	@Override
-	public List<Order> getCurrentExecutingOrders() throws SQLException {
-		return orderDAO.getOrdersByState(OrderState.EXECUTABLE);
+	public List<Order> getOrders() throws Exception {
+		return orderDAO.getAll(dBconnector.getConnection(), null);
 	}
 
 	@Override
-	public List<Order> getOrders(OrderState state, Date startTimePeriod, Date endTimePeriod) throws SQLException {
-		return orderDAO.getOrdersByStateAndPeriod(state, startTimePeriod, endTimePeriod);
+	public List<Order> getCurrentExecutingOrders() throws Exception {
+		return orderDAO.getOrdersByState(dBconnector.getConnection(), OrderState.EXECUTABLE, null);
 	}
 
 	@Override
-	public List<Order> sort(SortOrderFields sortField) throws SQLException {
-		return orderDAO.getAll(sortField, false);
+	public List<Order> getOrders(OrderState state, Date startTimePeriod, Date endTimePeriod) throws Exception {
+		return orderDAO.getOrdersByStateAndPeriod(dBconnector.getConnection(), state, startTimePeriod, endTimePeriod);
 	}
 
 	@Override
-	public Order getOrderByMaster(Master master) throws SQLException {
-		return orderDAO.getOrderByMaster(master);
+	public List<Order> sort(SortOrderFields sortField) throws Exception {
+		return orderDAO.getAll(dBconnector.getConnection(), sortField.name());
+	}
+
+	@Override
+	public List<Order> sortOrders(OrderState state, SortOrderFields sortField) throws Exception {
+		return orderDAO.getOrdersByState(dBconnector.getConnection(), state, sortField.name());
+	}
+
+	@Override
+	public Order getOrderByMaster(Master master) throws Exception {
+		return orderDAO.getOrderByMaster(dBconnector.getConnection(), master);
 
 	}
 
 	@Override
-	public Master getMasterByOrder(Order order) throws SQLException {
-		return orderDAO.getMasterByOrder(order);
+	public int getFreeGarageNumber(Date date) throws Exception {
+		return orderDAO.getExecutedOnDateOrdersNum(dBconnector.getConnection(), date);
 	}
 
 	@Override
-	public int getFreeGarageNumber(Date date) throws SQLException {
-		return orderDAO.getFreeGarageNumber(date);
+	public int getFreeMasterNumber(Date date) throws Exception {
+		return orderDAO.getExecutedOnDateOrdersNum(dBconnector.getConnection(), date);
 	}
 
 	@Override
-	public int getFreeMasterNumber(Date date) throws SQLException {
-		return orderDAO.getFreeMasterNumber(date);
+	public Order getOrderById(Long id) throws Exception {
+		return orderDAO.read(dBconnector.getConnection(), id);
 	}
 
 	@Override
-	public Order getOrderById(Long id) throws SQLException {
-		return orderDAO.read(id);
+	public synchronized boolean assignMasterToOrder(Order order, Master master) throws Exception {
+		order.setMaster(master);
+		IMasterService masterService = new MasterService();
+		Connection connection = dBconnector.getConnection();
+		try {
+			connection.setAutoCommit(false);
+			boolean stateUpdate = orderDAO.update(connection, order);
+			masterService.updateMaster(master, false);
+			connection.commit();
+			connection.setAutoCommit(true);
+			return stateUpdate;
+
+		} catch (Exception e) {
+			connection.rollback();
+			throw e;
+		}
 	}
 
 	@Override
-	public synchronized boolean assignMasterToOrder(Order order, Master master) throws SQLException {
-		return orderDAO.assignMasterToOrder(order, master);
-	}
+	public synchronized boolean assignGarageToOrder(Order order, Garage garage) throws Exception {
+		order.setGarage(garage);
+		IGarageService garageService = new GarageService();
+		Connection connection = dBconnector.getConnection();
+		try {
+			connection.setAutoCommit(false);
+			boolean stateUpdate = orderDAO.update(connection, order);
+			garageService.updateGarage(garage, false);
+			connection.commit();
+			connection.setAutoCommit(true);
+			return stateUpdate;
 
-	@Override
-	public synchronized boolean assignGarageToOrder(Order order, Garage garage) throws SQLException {
-		return orderDAO.assignGarageToOrder(order, garage);
+		} catch (Exception e) {
+			connection.rollback();
+			throw e;
+		}
 	}
 
 	@Override
@@ -126,8 +180,8 @@ public class OrderService implements IOrderService {
 	}
 
 	@Override
-	public synchronized boolean updateOrder(Order order) throws SQLException {
-		return orderDAO.update(order);
+	public synchronized boolean updateOrder(Order order) throws Exception {
+		return orderDAO.update(dBconnector.getConnection(), order);
 	}
 
 	@Override
@@ -138,20 +192,15 @@ public class OrderService implements IOrderService {
 	@Override
 	public synchronized boolean importOrders() throws FileNotFoundException, IOException, IllegalAccessException,
 			NoSuchFieldException, InstantiationException, InvocationTargetException, NoSuchMethodException,
-			ClassNotFoundException, SQLException {
+			ClassNotFoundException, Exception {
 		@SuppressWarnings("unchecked")
 		List<Order> orders = (List<Order>) CsvFileWorker.readFromFileOrder();
-		StringBuilder idStr = new StringBuilder();
+		List<Order> dbOrders = orderDAO.getAll(dBconnector.getConnection(), null);
 		for (Order order : orders) {
-			idStr.append(order.getId()).append(", ");
-		}
-		idStr.append(-1);
-		List<Long> existingId = orderDAO.getExistingId(idStr.toString());
-		for (Order order : orders) {
-			if (existingId.contains((Long) order.getId())) {
-				orderDAO.update(order);
+			if (dbOrders.contains(order)) {
+				orderDAO.update(dBconnector.getConnection(), order);
 			} else {
-				orderDAO.create(order);
+				orderDAO.create(dBconnector.getConnection(), order);
 			}
 		}
 		return true;

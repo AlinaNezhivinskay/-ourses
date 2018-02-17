@@ -8,5 +8,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/CarServiceCsv"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/CarServiceDependencyInjection"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/CarServiceDAO"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/CarServiceJDBC"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

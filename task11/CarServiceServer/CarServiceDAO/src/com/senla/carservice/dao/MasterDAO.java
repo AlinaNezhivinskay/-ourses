@@ -1,56 +1,56 @@
 package com.senla.carservice.dao;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.senla.carservice.api.dao.IMasterDAO;
-import com.senla.carservice.jdbc.connection.MySqlConnection;
 import com.senla.carservice.model.beans.Master;
-import com.senla.carservice.model.sortfields.master.SortMasterFields;
+import com.senla.carservice.model.beans.Order;
 
 public class MasterDAO extends GenericDAO<Master> implements IMasterDAO {
-	private static IMasterDAO instance;
+	private static Logger log = Logger.getLogger(MasterDAO.class.getName());
 
-	public static IMasterDAO getInstance() {
-		if (instance == null) {
-			instance = new MasterDAO();
-		}
-		return instance;
-	}
+	private final String SELECT_QUERY = "SELECT * FROM carservice_db.masters";
+	private final String UPDATE_QUERY = "UPDATE carservice_db.masters SET name=?,is_free=? WHERE id=?";
+	private final String DELETE_QUERY = "DELETE FROM carservice_db.masters";
+	private final String CREATE_QUERY = "INSERT INTO carservice_db.masters VALUES(?,?)";
 
-	public MasterDAO() {
-		super.connection = MySqlConnection.getInstance().getConnection();
+	private final String FREE_MASTERS_NUM_QUERY = "SELECT COUNT(*) AS number FROM carservice_db.masters GROUP BY is_free HAVING is_free=true";
+	private final String MASTER_BY_ORDER_QUERY = "SELECT * FROM carservice_db.masters LEFT JOIN carservice_db.orders ON masters.id=orders.master_id WHERE orders.id=?";
+
+	@Override
+	protected String getSelectQuery() {
+		return SELECT_QUERY;
 	}
 
 	@Override
-	public String getSelectQuery() {
-		String sql = "SELECT * FROM carservice_db.master";
-		return sql;
+	protected String getSelectByIdQuery() {
+		return SELECT_QUERY + " WHERE id=?";
 	}
 
 	@Override
-	public String getUpdateQuery() {
-		String sql = "UPDATE carservice_db.master SET name=?,is_free=? WHERE id=?;";
-		return sql;
+	protected String getUpdateQuery() {
+		return UPDATE_QUERY;
 	}
 
 	@Override
-	public String getDeleteQuery() {
-		String sql = "DELETE FROM carservice_db.master";
-		return sql;
+	protected String getDeleteQuery() {
+		return DELETE_QUERY;
 	}
 
 	@Override
-	public String getCreateQuery() {
-		String sql = "INSERT INTO carservice_db.master VALUES(?,?);";
-		return sql;
+	protected String getCreateQuery() {
+		return CREATE_QUERY;
 	}
 
 	@Override
-	public List<Master> parseResultSet(ResultSet resultSet) throws SQLException {
+	protected List<Master> parseResultSet(ResultSet resultSet) throws SQLException {
 		List<Master> masters = new ArrayList<Master>();
 		while (resultSet.next()) {
 			Master master = new Master();
@@ -63,7 +63,7 @@ public class MasterDAO extends GenericDAO<Master> implements IMasterDAO {
 	}
 
 	@Override
-	public void prepareStatementForUpdate(PreparedStatement statement, Master object) throws SQLException {
+	protected void prepareStatementForUpdate(PreparedStatement statement, Master object) throws SQLException {
 		statement.setString(1, object.getName());
 		statement.setBoolean(1, object.getIsFree());
 		statement.setLong(2, object.getId());
@@ -78,62 +78,51 @@ public class MasterDAO extends GenericDAO<Master> implements IMasterDAO {
 	}
 
 	@Override
-	public int getFreeMasterNum() throws SQLException {
+	public int getFreeMasterNum(Connection connection) throws Exception {
 		int freeGarageNum = 0;
-		String sql = "SELECT COUNT(*) AS number FROM carservice_db.master GROUP BY is_free HAVING is_free=true;";
-		try (PreparedStatement statement = connection.prepareStatement(sql);) {
+		try (PreparedStatement statement = connection.prepareStatement(FREE_MASTERS_NUM_QUERY);) {
 			ResultSet resultSet = statement.executeQuery();
 			resultSet.next();
 			freeGarageNum = resultSet.getInt("number");
+		} catch (SQLException e) {
+			log.error("SQLException", e);
+			throw new Exception(e);
 		}
 		return freeGarageNum;
 	}
 
 	@Override
-	public List<Master> getFreeMasters() throws SQLException {
+	public List<Master> getFreeMasters(Connection connection) throws Exception {
 		List<Master> list = new ArrayList<>();
-		String sql = "SELECT * FROM carservice_db.master WHERE is_free=true;";
-		try (PreparedStatement statement = connection.prepareStatement(sql)) {
+		String freeMastersSql = SELECT_QUERY + " WHERE is_free=true";
+		try (PreparedStatement statement = connection.prepareStatement(freeMastersSql)) {
 			ResultSet resultSet = statement.executeQuery();
 			list = parseResultSet(resultSet);
+		} catch (SQLException e) {
+			log.error("SQLException", e);
+			throw new Exception(e);
 		}
 		return list;
 	}
 
 	@Override
-	public List<Long> getExistingId(String idListStr) throws SQLException {
-		List<Long> list = new ArrayList<>();
-		String sql = "SELECT id FROM carservice_db.master WHERE id IN (?);";
-		try (PreparedStatement statement = connection.prepareStatement(sql)) {
-			statement.setString(1, idListStr);
-			ResultSet resultSet = statement.executeQuery();
-			list = parseIdResultSet(resultSet);
+	public Master getMasterByOrder(Connection connection, Order order) throws Exception {
+		if (order == null) {
+			return null;
 		}
-		return list;
-	}
-
-	private List<Long> parseIdResultSet(ResultSet resultSet) throws SQLException {
-		List<Long> existingId = new ArrayList<Long>();
-		while (resultSet.next()) {
-			existingId.add(resultSet.getLong("id"));
-		}
-		return existingId;
-	}
-
-	@Override
-	public List<Master> getAll(SortMasterFields field, boolean desc) throws SQLException {
 		List<Master> list = new ArrayList<>();
-		String sql = getSelectQuery();
-		sql += " ORDER BY = ?";
-		if (desc == true) {
-			sql += " desc";
-		}
-		try (PreparedStatement statement = connection.prepareStatement(sql)) {
-			statement.setString(1, field.name());
+		try (PreparedStatement statement = connection.prepareStatement(MASTER_BY_ORDER_QUERY)) {
+			statement.setLong(1, order.getId());
 			ResultSet resultSet = statement.executeQuery();
-			list = parseResultSet(resultSet);
+			parseResultSet(resultSet);
+		} catch (SQLException e) {
+			log.error("SQLException", e);
+			throw new Exception(e);
 		}
-		return list;
+		if (list == null || list.size() == 0) {
+			return null;
+		}
+		return list.iterator().next();
 	}
 
 }

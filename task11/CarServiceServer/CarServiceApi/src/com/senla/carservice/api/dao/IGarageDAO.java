@@ -1,6 +1,6 @@
 package com.senla.carservice.api.dao;
 
-import java.sql.SQLException;
+import java.sql.Connection;
 import java.util.List;
 
 import com.senla.carservice.api.dao.genericdao.IGenericDAO;
@@ -8,9 +8,7 @@ import com.senla.carservice.model.beans.Garage;
 
 public interface IGarageDAO extends IGenericDAO<Garage> {
 
-	int getFreeGarageNum() throws SQLException;
+	int getFreeGarageNum(Connection connection) throws Exception;
 
-	List<Garage> getFreeGarages() throws SQLException;
-
-	List<Long> getExistingId(String idListStr) throws SQLException;
+	List<Garage> getFreeGarages(Connection connection) throws Exception;
 }

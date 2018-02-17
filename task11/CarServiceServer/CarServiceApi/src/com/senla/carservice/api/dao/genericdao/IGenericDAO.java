@@ -1,19 +1,16 @@
 package com.senla.carservice.api.dao.genericdao;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.Connection;
 import java.util.List;
 
 public interface IGenericDAO<T> {
-	boolean create(T object) throws SQLException;
+	boolean create(Connection connection, T object) throws Exception;
 
-	T read(long key) throws SQLException;
+	T read(Connection connection, long key) throws Exception;
 
-	boolean update(T object) throws SQLException;
+	boolean update(Connection connection, T object) throws Exception;
 
-	boolean delete(T object) throws SQLException;
+	boolean delete(Connection connection, T object) throws Exception;
 
-	List<T> getAll() throws SQLException;
-
-	List<T> parseResultSet(ResultSet resultSet) throws SQLException;
+	List<T> getAll(Connection connection, String sort) throws Exception;
 }

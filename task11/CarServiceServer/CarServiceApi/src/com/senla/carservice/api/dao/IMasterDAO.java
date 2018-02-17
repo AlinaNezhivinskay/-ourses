@@ -1,18 +1,16 @@
 package com.senla.carservice.api.dao;
 
-import java.sql.SQLException;
+import java.sql.Connection;
 import java.util.List;
 
 import com.senla.carservice.api.dao.genericdao.IGenericDAO;
 import com.senla.carservice.model.beans.Master;
-import com.senla.carservice.model.sortfields.master.SortMasterFields;
+import com.senla.carservice.model.beans.Order;
 
 public interface IMasterDAO extends IGenericDAO<Master> {
-	int getFreeMasterNum() throws SQLException;
+	int getFreeMasterNum(Connection connection) throws Exception;
 
-	List<Master> getFreeMasters() throws SQLException;
+	List<Master> getFreeMasters(Connection connection) throws Exception;
 
-	List<Long> getExistingId(String idListStr) throws SQLException;
-
-	List<Master> getAll(SortMasterFields field, boolean desc) throws SQLException;
+	Master getMasterByOrder(Connection connection, Order order) throws Exception;
 }

@@ -3,7 +3,6 @@ package com.senla.carservice.view.facade;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
@@ -15,7 +14,7 @@ import com.senla.carservice.api.facade.ICarService;
 import com.senla.carservice.api.services.IGarageService;
 import com.senla.carservice.api.services.IMasterService;
 import com.senla.carservice.api.services.IOrderService;
-import com.senla.carservice.jdbc.connection.MySqlConnection;
+import com.senla.carservice.jdbc.connection.DBConnector;
 import com.senla.carservice.model.beans.Garage;
 import com.senla.carservice.model.beans.Master;
 import com.senla.carservice.model.beans.Order;
@@ -49,8 +48,8 @@ public class CarService implements ICarService {
 	public void addGarage(Garage garage) {
 		try {
 			garageService.addGarage(garage);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 	}
 
@@ -58,8 +57,8 @@ public class CarService implements ICarService {
 	public boolean removeGarage(Garage garage) {
 		try {
 			return garageService.removeGarage(garage);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return false;
 	}
@@ -68,8 +67,8 @@ public class CarService implements ICarService {
 	public List<Garage> getGarages() {
 		try {
 			return garageService.getGarages();
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 	}
@@ -78,8 +77,8 @@ public class CarService implements ICarService {
 	public void addMaster(Master master) {
 		try {
 			masterService.addMaster(master);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 	}
 
@@ -87,8 +86,8 @@ public class CarService implements ICarService {
 	public boolean removeMaster(Master master) {
 		try {
 			return masterService.removeMaster(master);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return false;
 	}
@@ -97,8 +96,8 @@ public class CarService implements ICarService {
 	public List<Master> getMasters() {
 		try {
 			return masterService.getMasters();
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 	}
@@ -107,8 +106,8 @@ public class CarService implements ICarService {
 	public void addOrder(Order order) {
 		try {
 			orderService.addOrder(order);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 	}
 
@@ -116,8 +115,8 @@ public class CarService implements ICarService {
 	public boolean removeOrder(Order order) {
 		try {
 			return orderService.removeOrder(order);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return false;
 	}
@@ -126,8 +125,8 @@ public class CarService implements ICarService {
 	public boolean closeOrder(Order order) {
 		try {
 			return orderService.closeOrder(order);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return false;
 	}
@@ -136,8 +135,8 @@ public class CarService implements ICarService {
 	public boolean cancelOrder(Order order) {
 		try {
 			return orderService.cancelOrder(order);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return false;
 	}
@@ -146,8 +145,8 @@ public class CarService implements ICarService {
 	public List<Garage> getFreeGarages() {
 		try {
 			return garageService.getFreeGarages();
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 	}
@@ -156,8 +155,8 @@ public class CarService implements ICarService {
 	public List<Order> getOrders() {
 		try {
 			return orderService.getOrders();
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 	}
@@ -166,8 +165,8 @@ public class CarService implements ICarService {
 	public List<Order> getCurrentExecutingOrders() {
 		try {
 			return orderService.getCurrentExecutingOrders();
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 	}
@@ -176,8 +175,8 @@ public class CarService implements ICarService {
 	public Order getOrderByMaster(Master master) {
 		try {
 			return orderService.getOrderByMaster(master);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 	}
@@ -185,9 +184,9 @@ public class CarService implements ICarService {
 	@Override
 	public Master getMasterByOrder(Order order) {
 		try {
-			return orderService.getMasterByOrder(order);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+			return masterService.getMasterByOrder(order);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 	}
@@ -199,8 +198,8 @@ public class CarService implements ICarService {
 					DateWorker.formatDate(endDate));
 		} catch (ParseException e) {
 			log.error("ParseException", e);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 	}
@@ -212,8 +211,8 @@ public class CarService implements ICarService {
 					DateWorker.formatDate(endDate));
 		} catch (ParseException e) {
 			log.error("ParseException", e);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 	}
@@ -225,8 +224,8 @@ public class CarService implements ICarService {
 					DateWorker.formatDate(endDate));
 		} catch (ParseException ex) {
 			log.error("ParseException: ", ex);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 	}
@@ -241,8 +240,8 @@ public class CarService implements ICarService {
 			return freePlace;
 		} catch (ParseException ex) {
 			log.error("ParseException: ", ex);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return 0;
 	}
@@ -266,8 +265,8 @@ public class CarService implements ICarService {
 	public List<Order> sortOrdersBySubmissionDate() {
 		try {
 			return orderService.sort(SortOrderFields.submission_date);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 	}
@@ -276,8 +275,8 @@ public class CarService implements ICarService {
 	public List<Order> sortOrdersByExecutionDate() {
 		try {
 			return orderService.sort(SortOrderFields.execution_date);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 	}
@@ -286,8 +285,8 @@ public class CarService implements ICarService {
 	public List<Order> sortOrdersByPlannedStartDate() {
 		try {
 			return orderService.sort(SortOrderFields.planned_start_date);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 	}
@@ -296,8 +295,8 @@ public class CarService implements ICarService {
 	public List<Order> sortOrdersByPrice() {
 		try {
 			return orderService.sort(SortOrderFields.price);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 	}
@@ -305,9 +304,9 @@ public class CarService implements ICarService {
 	@Override
 	public List<Master> sortMastersByAlphabetAscending() {
 		try {
-			return masterService.sort(SortMasterFields.name, false);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+			return masterService.sort(SortMasterFields.name);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 
@@ -316,9 +315,9 @@ public class CarService implements ICarService {
 	@Override
 	public List<Master> sortMastersByAlphabetDescending() {
 		try {
-			return masterService.sort(SortMasterFields.name, true);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+			return masterService.sort(SortMasterFields.name);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 
@@ -327,21 +326,48 @@ public class CarService implements ICarService {
 	@Override
 	public List<Master> sortMastersByEmployment() {
 		try {
-			return masterService.sort(SortMasterFields.is_free, false);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+			return masterService.sort(SortMasterFields.is_free);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 	}
 
 	@Override
-	public boolean exit() {
-		MySqlConnection connection = MySqlConnection.getInstance();
-		connection.closeConnection();
+	public void sortExecutingOrdersBySubmissionDate() {
 		try {
+			orderService.sortOrders(OrderState.EXECUTABLE, SortOrderFields.submission_date);
+		} catch (Exception e) {
+			log.error("Exception", e);
+		}
+	}
+
+	@Override
+	public void sortExecutingOrdersByExecutionDate() {
+		try {
+			orderService.sortOrders(OrderState.EXECUTABLE, SortOrderFields.execution_date);
+		} catch (Exception e) {
+			log.error("Exception", e);
+		}
+	}
+
+	@Override
+	public void sortExecutingOrdersByPrice() {
+		try {
+			orderService.sortOrders(OrderState.EXECUTABLE, SortOrderFields.price);
+		} catch (Exception e) {
+			log.error("Exception", e);
+		}
+	}
+
+	@Override
+	public boolean exit() {
+		DBConnector connection = DBConnector.getInstance();
+		try {
+			connection.closeConnection();
 			return connection.getConnection().isClosed();
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return false;
 	}
@@ -350,8 +376,8 @@ public class CarService implements ICarService {
 	public Garage getGarageById(Long id) {
 		try {
 			return garageService.getGarageById(id);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 	}
@@ -360,8 +386,8 @@ public class CarService implements ICarService {
 	public Master getMasterById(Long id) {
 		try {
 			return masterService.getMasterById(id);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 	}
@@ -370,8 +396,8 @@ public class CarService implements ICarService {
 	public Order getOrderById(Long id) {
 		try {
 			return orderService.getOrderById(id);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 	}
@@ -380,8 +406,8 @@ public class CarService implements ICarService {
 	public void shiftExecution(int daysNum) {
 		try {
 			orderService.shiftExecution(daysNum);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 
 	}
@@ -390,8 +416,8 @@ public class CarService implements ICarService {
 	public boolean assignMasterToOrder(Order order, Master master) {
 		try {
 			return orderService.assignMasterToOrder(order, master);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return false;
 	}
@@ -400,8 +426,8 @@ public class CarService implements ICarService {
 	public boolean assignGarageToOrder(Order order, Garage garage) {
 		try {
 			return orderService.assignGarageToOrder(order, garage);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return false;
 	}
@@ -410,8 +436,8 @@ public class CarService implements ICarService {
 	public List<Master> getFreeMasters() {
 		try {
 			return masterService.getFreeMasters();
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return null;
 	}
@@ -420,8 +446,8 @@ public class CarService implements ICarService {
 	public boolean updateOrder(Order order) {
 		try {
 			return orderService.updateOrder(order);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return false;
 	}
@@ -471,8 +497,8 @@ public class CarService implements ICarService {
 			log.error("NoSuchMethodException", e);
 		} catch (ClassNotFoundException e) {
 			log.error("ClassNotFoundException", e);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return false;
 
@@ -512,8 +538,8 @@ public class CarService implements ICarService {
 			log.error("NoSuchMethodException", e);
 		} catch (ClassNotFoundException e) {
 			log.error("ClassNotFoundException", e);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return false;
 	}
@@ -552,8 +578,8 @@ public class CarService implements ICarService {
 			log.error("NoSuchMethodException", e);
 		} catch (ClassNotFoundException e) {
 			log.error("ClassNotFoundException", e);
-		} catch (SQLException e) {
-			log.error("SQLException", e);
+		} catch (Exception e) {
+			log.error("Exception", e);
 		}
 		return false;
 	}

@@ -1,61 +1,62 @@
 package com.senla.carservice.dao;
 
+import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.senla.carservice.api.dao.IOrderDAO;
-import com.senla.carservice.jdbc.connection.MySqlConnection;
 import com.senla.carservice.model.beans.Garage;
 import com.senla.carservice.model.beans.Master;
 import com.senla.carservice.model.beans.Order;
 import com.senla.carservice.model.orderstate.OrderState;
-import com.senla.carservice.model.sortfields.order.SortOrderFields;
 
 public class OrderDAO extends GenericDAO<Order> implements IOrderDAO {
-	private static IOrderDAO instance;
+	private static Logger log = Logger.getLogger(OrderDAO.class.getName());
 
-	public static IOrderDAO getInstance() {
-		if (instance == null) {
-			instance = new OrderDAO();
-		}
-		return instance;
-	}
+	private final String SELECT_QUERY = "SELECT o.*,g.is_free AS garage_is_free,m.name AS master_name,m.is_free AS master_is_free FROM carservice_db.orders o JOIN carservice_db.garages g ON o.garage_id=g.id LEFT JOIN carservice_db.masters m ON o.master_id=m.id";
+	private final String UPDATE_QUERY = "UPDATE carservice_db.orders SET order_state=?, submission_date=?, execution_date=?, planned_start_date=?, price=?, garage_id=?, master_id=?  WHERE id=?";
+	private final String DELETE_QUERY = "DELETE FROM carservice_db.orders";
+	private final String CREATE_QUERY = "INSERT INTO carservice_db.orders VALUES(?,?,?,?,?,?,?)";
 
-	public OrderDAO() {
-		super.connection = MySqlConnection.getInstance().getConnection();
+	private final String SELECT_BY_MASTER_QUERY = SELECT_QUERY + " WHERE master_id = ?";
+	private final String SELECT_BY_STATE_QUERY = SELECT_QUERY + " WHERE order_state=?";
+	private final String SELECT_BY_STATE_AND_PERIOD_QUERY = SELECT_BY_STATE_QUERY
+			+ " AND submission_date>? AND execution_date<?";
+	private final String EXECUTED_ON_DATE_ORDERS_NUM_QUERY = "SELECT count(*) AS number FROM carservice_db.orders o WHERE o.order_state='EXECUTABLE' AND o.execution_date<?";
+
+	@Override
+	protected String getSelectQuery() {
+		return SELECT_QUERY;
 	}
 
 	@Override
-	public String getSelectQuery() {
-		String sql = "SELECT * FROM carservice_db.carservice_order";
-		return sql;
+	protected String getSelectByIdQuery() {
+		return SELECT_QUERY + " WHERE o.id=?";
 	}
 
 	@Override
-	public String getUpdateQuery() {
-		String sql = "UPDATE carservice_db.carservice_order SET order_state=?, submission_date=?, execution_date=?, planned_start_date=?, price=?, garage_id=?, master_id=?  WHERE id=?;";
-		return sql;
+	protected String getUpdateQuery() {
+		return UPDATE_QUERY;
 	}
 
 	@Override
-	public String getDeleteQuery() {
-		String sql = "DELETE FROM carservice_db.carservice_order";
-		return sql;
+	protected String getDeleteQuery() {
+		return DELETE_QUERY;
 	}
 
 	@Override
-	public String getCreateQuery() {
-		String sql = "INSERT INTO carservice_db.carservice_order VALUES(?,?,?,?,?,?,?);";
-		return sql;
+	protected String getCreateQuery() {
+		return CREATE_QUERY;
 	}
 
 	@Override
-	public List<Order> parseResultSet(ResultSet resultSet) throws SQLException {
+	protected List<Order> parseResultSet(ResultSet resultSet) throws SQLException {
 		List<Order> orders = new ArrayList<Order>();
 		while (resultSet.next()) {
 			Order order = new Order();
@@ -64,18 +65,20 @@ public class OrderDAO extends GenericDAO<Order> implements IOrderDAO {
 			order.setExecutionDate(resultSet.getDate("execution_date"));
 			order.setPlannedStartDate(resultSet.getDate("planned_start_date"));
 			order.setPrice(resultSet.getDouble("price"));
-			Long garage_id = resultSet.getLong("garage_id");
-			Garage garage = null;
-			if (garage_id != null) {
-				garage = GarageDAO.getInstance().read(garage_id);
-			}
+
+			Garage garage = new Garage();
+			garage.setId(resultSet.getLong("garage_id"));
+			garage.setIsFree(resultSet.getBoolean("garage_is_free"));
 			order.setGarage(garage);
+
 			Long master_id = resultSet.getLong("master_id");
-			Master master = null;
 			if (master_id != null) {
-				master = MasterDAO.getInstance().read(garage_id);
+				Master master = new Master();
+				master.setId(master_id);
+				master.setName(resultSet.getString("master_name"));
+				master.setIsFree(resultSet.getBoolean("master_is_free"));
+				order.setMaster(master);
 			}
-			order.setMaster(master);
 			orders.add(order);
 		}
 		return orders;
@@ -84,12 +87,16 @@ public class OrderDAO extends GenericDAO<Order> implements IOrderDAO {
 	@Override
 	public void prepareStatementForUpdate(PreparedStatement statement, Order object) throws SQLException {
 		statement.setString(1, object.getState().toString());
-		statement.setDate(2, new Date(object.getSubmissionDate().getTime()));
-		statement.setDate(3, new Date(object.getExecutionDate().getTime()));
-		statement.setDate(4, new Date(object.getPlannedStartDate().getTime()));
+		statement.setDate(2, convertDate(object.getSubmissionDate()));
+		statement.setDate(3, convertDate(object.getExecutionDate()));
+		statement.setDate(4, convertDate(object.getPlannedStartDate()));
 		statement.setDouble(5, object.getPrice());
 		statement.setLong(6, object.getGarage().getId());
-		statement.setLong(7, object.getMaster().getId());
+		if (object.getMaster() == null) {
+			statement.setNull(7, java.sql.Types.INTEGER);
+		} else {
+			statement.setLong(7, object.getMaster().getId());
+		}
 		statement.setLong(8, object.getId());
 
 	}
@@ -97,180 +104,90 @@ public class OrderDAO extends GenericDAO<Order> implements IOrderDAO {
 	@Override
 	public void prepareStatementForInsert(PreparedStatement statement, Order object) throws SQLException {
 		statement.setString(1, object.getState().toString());
-		statement.setDate(2, new Date(object.getSubmissionDate().getTime()));
-		statement.setDate(3, new Date(object.getExecutionDate().getTime()));
-		statement.setDate(4, new Date(object.getPlannedStartDate().getTime()));
+		statement.setDate(2, convertDate(object.getSubmissionDate()));
+		statement.setDate(3, convertDate(object.getExecutionDate()));
+		statement.setDate(4, convertDate(object.getPlannedStartDate()));
 		statement.setDouble(5, object.getPrice());
 		statement.setLong(6, object.getGarage().getId());
-		statement.setLong(7, object.getMaster().getId());
-	}
-
-	@Override
-	public boolean updateOrderState(Order order, OrderState state) throws SQLException {
-		String sql = "UPDATE carservice_db.carservice_order SET order_state=? WHERE id=?;";
-		int result;
-		try (PreparedStatement statement = connection.prepareStatement(sql)) {
-			statement.setString(1, state.name());
-			statement.setLong(2, order.getId());
-			result = statement.executeUpdate();
+		if (object.getMaster() == null) {
+			statement.setNull(7, java.sql.Types.INTEGER);
+		} else {
+			statement.setLong(7, object.getMaster().getId());
 		}
-		return result > 0 ? true : false;
 	}
 
 	@Override
-	public List<Order> getAll(SortOrderFields field, boolean desc) throws SQLException {
+	public List<Order> getOrdersByState(Connection connection, OrderState state, String sort) throws Exception {
 		List<Order> list = new ArrayList<>();
-		String sql = getSelectQuery();
-		sql += " ORDER BY = ?";
-		if (desc == true) {
-			sql += " desc";
+		String sql = SELECT_BY_STATE_QUERY;
+		if (sort != null) {
+			sql += " ORDER BY " + sort;
 		}
-		try (PreparedStatement statement = connection.prepareStatement(sql)) {
-			statement.setString(1, field.name());
-			ResultSet resultSet = statement.executeQuery();
-			list = parseResultSet(resultSet);
-		}
-		return list;
-	}
-
-	@Override
-	public List<Order> getOrdersByState(OrderState state) throws SQLException {
-		List<Order> list = new ArrayList<>();
-		String sql = "SELECT * FROM carservice_db.carservice_order WHERE order_state=?;";
 		try (PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setString(1, state.name());
 			ResultSet resultSet = statement.executeQuery();
 			list = parseResultSet(resultSet);
-		}
-		return list;
-	}
-
-	@Override
-	public List<Order> getOrdersByStateAndPeriod(OrderState state, java.util.Date startTimePeriod,
-			java.util.Date endTimePeriod) throws SQLException {
-		List<Order> list = new ArrayList<>();
-		String sql = "SELECT * FROM carservice_db.carservice_order WHERE order_state=? AND submission_date>? AND execution_date<?;";
-		try (PreparedStatement statement = connection.prepareStatement(sql)) {
-			statement.setString(1, state.name());
-			statement.setDate(2, new Date(startTimePeriod.getTime()));
-			statement.setDate(3, new Date(endTimePeriod.getTime()));
-			ResultSet resultSet = statement.executeQuery();
-			list = parseResultSet(resultSet);
-		}
-		return list;
-	}
-
-	@Override
-	public Order getOrderByMaster(Master master) throws SQLException {
-		List<Order> list = new ArrayList<>();
-		String sql = getSelectQuery();
-		sql += " WHERE master_id = ?";
-		try (PreparedStatement statement = connection.prepareStatement(sql)) {
-			statement.setLong(1, master.getId());
-			ResultSet resultSet = statement.executeQuery();
-			list = parseResultSet(resultSet);
-		}
-		if (list == null || list.size() == 0) {
-			return null;
-		}
-		return list.iterator().next();
-	}
-
-	@Override
-	public Master getMasterByOrder(Order order) throws SQLException {
-		List<Master> list = new ArrayList<>();
-		String sql = "SELECT m.id,m.name,m.is_free FROM carservice_db.master m JOIN carservice_db.carservice_order o ON m.id=o.master_id WHERE o.id=?;";
-		try (PreparedStatement statement = connection.prepareStatement(sql)) {
-			statement.setLong(1, order.getId());
-			ResultSet resultSet = statement.executeQuery();
-			MasterDAO.getInstance().parseResultSet(resultSet);
-		}
-		if (list == null || list.size() == 0) {
-			return null;
-		}
-		return list.iterator().next();
-	}
-
-	@Override
-	public int getFreeGarageNumber(java.util.Date date) throws SQLException {
-		int freeGarageNum = 0;
-		String sql = "SELECT count(*) AS number FROM carservice_db.carservice_order o WHERE o.order_state='EXECUTABLE' AND o.execution_date<?";
-		try (PreparedStatement statement = connection.prepareStatement(sql);) {
-			statement.setDate(1, new Date(date.getTime()));
-			ResultSet resultSet = statement.executeQuery();
-			resultSet.next();
-			freeGarageNum = resultSet.getInt("number");
-		}
-		return freeGarageNum;
-	}
-
-	@Override
-	public int getFreeMasterNumber(java.util.Date date) throws SQLException {
-		int freeGarageNum = 0;
-		String sql = "SELECT count(*) AS number FROM carservice_db.carservice_order o WHERE o.order_state='EXECUTABLE' AND o.execution_date<?";
-		try (PreparedStatement statement = connection.prepareStatement(sql);) {
-			statement.setDate(1, new Date(date.getTime()));
-			ResultSet resultSet = statement.executeQuery();
-			resultSet.next();
-			freeGarageNum = resultSet.getInt("number");
-		}
-		return freeGarageNum;
-	}
-
-	@Override
-	public boolean assignMasterToOrder(Order order, Master master) throws SQLException {
-		String sql = "UPDATE carservice_db.carservice_order SET master_id=? WHERE id=?;";
-		int result;
-		try (PreparedStatement statement = connection.prepareStatement(sql)) {
-			statement.setLong(1, master.getId());
-			statement.setLong(2, order.getId());
-			result = statement.executeUpdate();
-		}
-		master.setIsFree(false);
-		MasterDAO.getInstance().update(master);
-		return result > 0 ? true : false;
-	}
-
-	@Override
-	public boolean assignGarageToOrder(Order order, Garage garage) throws SQLException {
-		connection.setAutoCommit(false);
-		Savepoint savepoint = connection.setSavepoint("SavepointForAssign");
-		String sql = "UPDATE carservice_db.carservice_order SET garage_id=? WHERE id=?;";
-		int result = 0;
-		try (PreparedStatement statement = connection.prepareStatement(sql)) {
-			statement.setLong(1, garage.getId());
-			statement.setLong(2, order.getId());
-			result = statement.executeUpdate();
-
-			garage.setIsFree(false);
-			GarageDAO.getInstance().update(garage);
-
-			connection.commit();
 		} catch (SQLException e) {
-			connection.rollback(savepoint);
-		}
-
-		return result > 0 ? true : false;
-	}
-
-	@Override
-	public List<Long> getExistingId(String idListStr) throws SQLException {
-		List<Long> list = new ArrayList<>();
-		String sql = "SELECT id FROM carservice_db.carservice_order WHERE id IN (?);";
-		try (PreparedStatement statement = connection.prepareStatement(sql)) {
-			statement.setString(1, idListStr);
-			ResultSet resultSet = statement.executeQuery();
-			list = parseIdResultSet(resultSet);
+			log.error("SQLException", e);
+			throw new Exception(e);
 		}
 		return list;
 	}
 
-	private List<Long> parseIdResultSet(ResultSet resultSet) throws SQLException {
-		List<Long> existingId = new ArrayList<Long>();
-		while (resultSet.next()) {
-			existingId.add(resultSet.getLong("id"));
+	@Override
+	public List<Order> getOrdersByStateAndPeriod(Connection connection, OrderState state,
+			java.util.Date startTimePeriod, java.util.Date endTimePeriod) throws Exception {
+		List<Order> list = new ArrayList<>();
+		try (PreparedStatement statement = connection.prepareStatement(SELECT_BY_STATE_AND_PERIOD_QUERY)) {
+			statement.setString(1, state.name());
+			statement.setDate(2, convertDate(startTimePeriod));
+			statement.setDate(3, convertDate(endTimePeriod));
+			ResultSet resultSet = statement.executeQuery();
+			list = parseResultSet(resultSet);
+		} catch (SQLException e) {
+			log.error("SQLException", e);
+			throw new Exception(e);
 		}
-		return existingId;
+		return list;
+	}
+
+	@Override
+	public Order getOrderByMaster(Connection connection, Master master) throws Exception {
+		if (master == null) {
+			return null;
+		}
+		List<Order> list = new ArrayList<>();
+		try (PreparedStatement statement = connection.prepareStatement(SELECT_BY_MASTER_QUERY)) {
+			statement.setLong(1, master.getId());
+			ResultSet resultSet = statement.executeQuery();
+			list = parseResultSet(resultSet);
+		} catch (SQLException e) {
+			log.error("SQLException", e);
+			throw new Exception(e);
+		}
+		if (list == null || list.size() == 0) {
+			return null;
+		}
+		return list.iterator().next();
+	}
+
+	@Override
+	public int getExecutedOnDateOrdersNum(Connection connection, java.util.Date date) throws Exception {
+		int ordersNum = 0;
+		try (PreparedStatement statement = connection.prepareStatement(EXECUTED_ON_DATE_ORDERS_NUM_QUERY);) {
+			statement.setDate(1, convertDate(date));
+			ResultSet resultSet = statement.executeQuery();
+			resultSet.next();
+			ordersNum = resultSet.getInt("number");
+		} catch (SQLException e) {
+			log.error("SQLException", e);
+			throw new Exception(e);
+		}
+		return ordersNum;
+	}
+
+	private Date convertDate(java.util.Date date) {
+		return new Date(date.getTime());
 	}
 
 }

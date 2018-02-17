@@ -8,19 +8,23 @@ import org.apache.log4j.Logger;
 
 import com.senla.carservice.configuration.properties.JdbcPropetryRepository;
 
-public class MySqlConnection {
-	private static Logger log = Logger.getLogger(MySqlConnection.class.getName());
+public class DBConnector {
+	private static Logger log = Logger.getLogger(DBConnector.class.getName());
 	private Connection connection;
-	private static MySqlConnection instance;
+	private static DBConnector instance;
 
-	public static MySqlConnection getInstance() {
+	public static DBConnector getInstance() {
 		if (instance == null) {
-			instance = new MySqlConnection();
+			instance = new DBConnector();
 		}
 		return instance;
 	}
 
-	private MySqlConnection() {
+	private DBConnector() {
+		connect();
+	}
+
+	private void connect() {
 		JdbcPropetryRepository properties = JdbcPropetryRepository.getInstance();
 		try {
 			DriverManager.registerDriver(new com.mysql.jdbc.Driver());
@@ -29,20 +33,24 @@ public class MySqlConnection {
 		} catch (SQLException e) {
 			log.error("SQLException", e);
 		}
-
 	}
 
 	public Connection getConnection() {
+		if (connection == null) {
+			connect();
+		}
 		return connection;
 	}
 
-	public void closeConnection() {
+	public void closeConnection() throws Exception {
 		try {
-			if (!connection.isClosed()) {
+			if (connection != null && !connection.isClosed()) {
 				connection.close();
+				connection = null;
 			}
 		} catch (SQLException e) {
-			log.error("SQLException", e);
+			log.error("Exception", e);
+			throw new Exception(e);
 		}
 
 	}

@@ -93,4 +93,10 @@ public interface ICarService {
 	boolean exportOrders(List<Order> orders);
 
 	boolean importOrders();
+
+	void sortExecutingOrdersBySubmissionDate();
+
+	void sortExecutingOrdersByExecutionDate();
+
+	void sortExecutingOrdersByPrice();
 }
