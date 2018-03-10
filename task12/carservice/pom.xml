@@ -1,0 +1,28 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>carservice</groupId>
+  <artifactId>carservice</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <modules>
+  	<module>carservice-model</module>
+  	<module>carservice-dao</module>
+  	
+  	<module>carservice-view</module>
+  	<module>carservice-annotations</module>
+  	<module>carservice-api</module>
+  	<module>carservice-controller</module>
+  	<module>carservice-csv</module>
+  	<module>carservice-configuration</module>
+  	<module>carservice-util</module>
+  	<module>carservice-dependency-injection</module>
+  	<module>carservice-server</module>
+  </modules>
+  <dependencies>
+  	<dependency>
+  		<groupId>log4j</groupId>
+  		<artifactId>log4j</artifactId>
+  		<version>1.2.17</version>
+  	</dependency>
+  </dependencies>
+</project>
