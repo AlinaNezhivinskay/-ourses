@@ -19,6 +19,10 @@
 		<property name="hibernate.connection.password">
 			root
 		</property>
+		
+		<property name="hibernate.current_session_context_class">
+			org.hibernate.context.internal.ThreadLocalSessionContext
+		</property>
 
 		<mapping class="com.senla.carservice.model.beans.Garage" />
 		<mapping class="com.senla.carservice.model.beans.Master" />

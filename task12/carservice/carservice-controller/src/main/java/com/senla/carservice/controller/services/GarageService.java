@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import com.senla.carservice.api.dao.IGarageDAO;
 import com.senla.carservice.api.services.IGarageService;
@@ -22,113 +23,127 @@ public class GarageService implements IGarageService {
 
 	@Override
 	public synchronized void addGarage(Garage garage) throws Exception {
-		Session session = hibernateUtil.getSessionFactory().openSession();
+		Session session = hibernateUtil.getSessionFactory().getCurrentSession();
+		Transaction transaction = null;
 		try {
-			session.beginTransaction();
+			transaction = session.beginTransaction();
 			garageDAO.create(session, garage);
-			session.getTransaction().commit();
+			transaction.commit();
 		} catch (Exception e) {
-			session.getTransaction().rollback();
+			if (transaction != null) {
+				transaction.rollback();
+			}
 			throw e;
 		}
-		session.close();
 	}
 
 	@Override
 	public synchronized boolean removeGarage(Garage garage) throws Exception {
 		boolean result = false;
-		Session session = hibernateUtil.getSessionFactory().openSession();
+		Session session = hibernateUtil.getSessionFactory().getCurrentSession();
+		Transaction transaction = null;
 		try {
-			session.beginTransaction();
+			transaction = session.beginTransaction();
 			result = garageDAO.delete(session, garage);
-			session.getTransaction().commit();
+			transaction.commit();
+			return result;
 		} catch (Exception e) {
-			session.getTransaction().rollback();
+			if (transaction != null) {
+				transaction.rollback();
+			}
 			throw e;
 		}
-		session.close();
-		return result;
 	}
 
 	@Override
 	public synchronized boolean updateGarage(Garage garage, boolean isFree) throws Exception {
 		garage.setIsFree(isFree);
 		boolean result = false;
-		Session session = hibernateUtil.getSessionFactory().openSession();
+		Session session = hibernateUtil.getSessionFactory().getCurrentSession();
+		Transaction transaction = null;
 		try {
-			session.beginTransaction();
+			transaction = session.beginTransaction();
 			result = garageDAO.update(session, garage);
-			session.getTransaction().commit();
+			transaction.commit();
+			return result;
 		} catch (Exception e) {
-			session.getTransaction().rollback();
+			if (transaction != null) {
+				transaction.rollback();
+			}
 			throw e;
 		}
-		session.close();
-		return result;
 	}
 
 	@Override
 	public int getFreeGarageNumber() throws Exception {
 		int result = 0;
-		Session session = hibernateUtil.getSessionFactory().openSession();
+		Session session = hibernateUtil.getSessionFactory().getCurrentSession();
+		Transaction transaction = null;
 		try {
-			session.beginTransaction();
+			transaction = session.beginTransaction();
 			result = garageDAO.getFreeGarageNum(session);
-			session.getTransaction().commit();
+			transaction.commit();
+			return result;
 		} catch (Exception e) {
-			session.getTransaction().rollback();
+			if (transaction != null) {
+				transaction.rollback();
+			}
 			throw e;
 		}
-		session.close();
-		return result;
 	}
 
 	@Override
 	public List<Garage> getFreeGarages() throws Exception {
 		List<Garage> garages;
-		Session session = hibernateUtil.getSessionFactory().openSession();
+		Session session = hibernateUtil.getSessionFactory().getCurrentSession();
+		Transaction transaction = null;
 		try {
-			session.beginTransaction();
+			transaction = session.beginTransaction();
 			garages = garageDAO.getFreeGarages(session);
-			session.getTransaction().commit();
+			transaction.commit();
+			return garages;
 		} catch (Exception e) {
-			session.getTransaction().rollback();
+			if (transaction != null) {
+				transaction.rollback();
+			}
 			throw e;
 		}
-		session.close();
-		return garages;
 	}
 
 	@Override
 	public List<Garage> getGarages() throws Exception {
 		List<Garage> garages;
-		Session session = hibernateUtil.getSessionFactory().openSession();
+		Session session = hibernateUtil.getSessionFactory().getCurrentSession();
+		Transaction transaction = null;
 		try {
-			session.beginTransaction();
+			transaction = session.beginTransaction();
 			garages = garageDAO.getAll(Garage.class, session, null);
-			session.getTransaction().commit();
+			transaction.commit();
+			return garages;
 		} catch (Exception e) {
-			session.getTransaction().rollback();
+			if (transaction != null) {
+				transaction.rollback();
+			}
 			throw e;
 		}
-		session.close();
-		return garages;
 	}
 
 	@Override
 	public Garage getGarageById(Long id) throws Exception {
 		Garage garage;
-		Session session = hibernateUtil.getSessionFactory().openSession();
+		Session session = hibernateUtil.getSessionFactory().getCurrentSession();
+		Transaction transaction = null;
 		try {
-			session.beginTransaction();
+			transaction = session.beginTransaction();
 			garage = garageDAO.read(Garage.class, session, id);
-			session.getTransaction().commit();
+			transaction.commit();
+			return garage;
 		} catch (Exception e) {
-			session.getTransaction().rollback();
+			if (transaction != null) {
+				transaction.rollback();
+			}
 			throw e;
 		}
-		session.close();
-		return garage;
 	}
 
 	@Override
@@ -141,19 +156,21 @@ public class GarageService implements IGarageService {
 	public synchronized boolean importGarages() throws Exception {
 		@SuppressWarnings("unchecked")
 		List<Garage> garages = (List<Garage>) CsvFileWorker.readFromFileGarage();
-		Session session = hibernateUtil.getSessionFactory().openSession();
+		Session session = hibernateUtil.getSessionFactory().getCurrentSession();
+		Transaction transaction = null;
 		try {
-			session.beginTransaction();
+			transaction = session.beginTransaction();
 			for (Garage garage : garages) {
 				garageDAO.saveOrUpdate(session, garage);
 			}
-			session.getTransaction().commit();
+			transaction.commit();
+			return true;
 		} catch (Exception e) {
-			session.getTransaction().rollback();
+			if (transaction != null) {
+				transaction.rollback();
+			}
 			throw e;
 		}
-		session.close();
-		return true;
 	}
 
 }
